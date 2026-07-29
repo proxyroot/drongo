@@ -1,0 +1,42 @@
+name: 🐛 Bug report
+description: Something behaves differently from the real GCP API.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for helping make gato better! Please fill in as much as you can.
+  - type: input
+    id: service
+    attributes:
+      label: Affected service
+      placeholder: e.g. storage, secretmanager
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: A small snippet using `mock_gcp` and a real google-cloud client.
+      render: python
+      placeholder: |
+        from gato import mock_gcp
+
+        @mock_gcp
+        def test_it():
+            from google.cloud import storage
+            ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected vs actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: versions
+    attributes:
+      label: Versions
+      description: Output of `pip show gato google-cloud-storage` (and Python version).
+    validations:
+      required: true
