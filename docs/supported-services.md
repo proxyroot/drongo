@@ -142,8 +142,26 @@ namespace. Use the normal client with no `transport` argument.
 | Real-time listeners (`on_snapshot`) | ⬜ |
 | Aggregation / collection-group queries | ⬜ |
 
+## IAM & Service Accounts (`iam`)
+
+Client: `google-cloud-iam` (`iam_admin_v1.IAMClient`) · Transport: gRPC only,
+served by an in-process gRPC emulator with an injected transport (no REST
+transport or emulator env var exists) · Backend: per-project. Use the normal
+client with no `transport` argument.
+
+| Operation | Status |
+| --- | --- |
+| Create / get / list / delete service account | ✅ |
+| Get by email or unique id | ✅ |
+| Enable / disable service account | ✅ |
+| Create / list / get / delete key | ✅ |
+| Update (display name / description) | ⬜ |
+| Roles, IAM policy get/set | ⬜ |
+| `SignBlob` / `SignJwt` | ⬜ |
+
 ## Planned
 
-Cloud Logging · Firestore transactions & listeners · Folders/Organizations. See the
-[roadmap](https://github.com/proxyroot/drongo#roadmap) and
+Cloud Logging · Cloud KMS · Firestore transactions & listeners · IAM roles &
+policies · Folders/Organizations. See the
+[roadmap](https://drongo.proxyroot.com/roadmap/) and
 [open a service request](https://github.com/proxyroot/drongo/issues/new/choose).
