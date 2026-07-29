@@ -70,7 +70,10 @@ def test_fanout():
 
     for sub in ("a", "b"):
         pulled = subscriber.pull(
-            request={"subscription": f"projects/p/subscriptions/{sub}", "max_messages": 10}
+            request={
+                "subscription": f"projects/p/subscriptions/{sub}",
+                "max_messages": 10,
+            }
         )
         assert pulled.received_messages[0].message.data == b"payload"
 ```

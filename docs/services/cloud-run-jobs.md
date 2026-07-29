@@ -28,7 +28,7 @@ PARENT = "projects/my-project/locations/us-central1"
 def test_run_job():
     from google.cloud import run_v2
 
-    jobs = run_v2.JobsClient()          # default, no transport arg
+    jobs = run_v2.JobsClient()  # default, no transport arg
     executions = run_v2.ExecutionsClient()
 
     job = run_v2.Job(
@@ -44,9 +44,9 @@ def test_run_job():
     assert created.name == f"{PARENT}/jobs/nightly"
 
     # Running the job creates an execution.
-    execution = jobs.run_job(
-        request={"name": f"{PARENT}/jobs/nightly"}
-    ).result(timeout=10)
+    execution = jobs.run_job(request={"name": f"{PARENT}/jobs/nightly"}).result(
+        timeout=10
+    )
     assert execution.name.startswith(f"{PARENT}/jobs/nightly/executions/")
 ```
 

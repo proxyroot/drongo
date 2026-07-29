@@ -83,7 +83,9 @@ def test_list_delete():
             }
         )
 
-    names = [s.name.rsplit("/", 1)[-1] for s in client.list_secrets(parent="projects/p")]
+    names = [
+        s.name.rsplit("/", 1)[-1] for s in client.list_secrets(parent="projects/p")
+    ]
     assert sorted(names) == ["a", "b"]
 
     client.delete_secret(request={"name": "projects/p/secrets/a"})
