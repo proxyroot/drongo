@@ -1,13 +1,13 @@
-"""Standalone HTTP server ("gato server").
+"""Standalone HTTP server ("drongo server").
 
 Like ``moto_server``, this exposes the exact same in-memory backends over a real
 socket so that GCP SDKs in *any* language - or the google client libraries in
-emulator mode - can talk to gato. State lives for the lifetime of the process.
+emulator mode - can talk to drongo. State lives for the lifetime of the process.
 
 Point clients at it with the relevant emulator environment variable, e.g. for
 Cloud Storage::
 
-    $ gato server --port 9090 &
+    $ drongo server --port 9090 &
     $ export STORAGE_EMULATOR_HOST=http://localhost:9090
 
 Other services accept an explicit endpoint via ``client_options``::
@@ -23,8 +23,8 @@ from __future__ import annotations
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-from gato.core import registry
-from gato.core.responses import BaseResponse, HttpResponse
+from drongo.core import registry
+from drongo.core.responses import BaseResponse, HttpResponse
 
 # Backends are shared mutable state; serialise request handling so the
 # threading server stays correct without sprinkling locks through every model.
@@ -41,10 +41,10 @@ class _RequestShim:
         self.body = body
 
 
-class GatoHTTPRequestHandler(BaseHTTPRequestHandler):
+class DrongoHTTPRequestHandler(BaseHTTPRequestHandler):
     """Dispatches every request across all registered service routers."""
 
-    server_version = "gato"
+    server_version = "drongo"
     protocol_version = "HTTP/1.1"
 
     def _dispatch(self) -> None:
@@ -64,7 +64,7 @@ class GatoHTTPRequestHandler(BaseHTTPRequestHandler):
             (
                 404,
                 {"Content-Type": "application/json"},
-                '{"error": {"code": 404, "message": "gato: no matching route"}}',
+                '{"error": {"code": 404, "message": "drongo: no matching route"}}',
             )
         )
 
@@ -94,10 +94,10 @@ class GatoHTTPRequestHandler(BaseHTTPRequestHandler):
 
 def create_server(host: str = "localhost", port: int = 0) -> ThreadingHTTPServer:
     """Build (but do not start) a server with all services registered."""
-    import gato.services  # noqa: F401  (import for registration side effects)
+    import drongo.services  # noqa: F401  (import for registration side effects)
 
     registry.reset_all_backends()
-    return ThreadingHTTPServer((host, port), GatoHTTPRequestHandler)
+    return ThreadingHTTPServer((host, port), DrongoHTTPRequestHandler)
 
 
 def run(host: str = "localhost", port: int = 5000) -> None:
@@ -105,7 +105,7 @@ def run(host: str = "localhost", port: int = 5000) -> None:
     httpd = create_server(host, port)
     bound_port = httpd.server_address[1]
     endpoint = f"http://{host}:{bound_port}"
-    print(f"gato server listening on {endpoint}")
+    print(f"drongo server listening on {endpoint}")
     print(f"  export STORAGE_EMULATOR_HOST={endpoint}")
     try:
         httpd.serve_forever()

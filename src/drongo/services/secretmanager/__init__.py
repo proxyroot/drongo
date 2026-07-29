@@ -1,17 +1,17 @@
 """Google Cloud Secret Manager mock.
 
-Registers the ``secretmanager`` service with the gato engine on import.
+Registers the ``secretmanager`` service with the drongo engine on import.
 """
 
 from __future__ import annotations
 
-from gato.core.registry import ServiceDefinition, register_service
-from gato.services.secretmanager import urls
-from gato.services.secretmanager.models import (
+from drongo.core.registry import ServiceDefinition, register_service
+from drongo.services.secretmanager import urls
+from drongo.services.secretmanager.models import (
     SecretManagerBackend,
     secretmanager_backends,
 )
-from gato.services.secretmanager.responses import SecretManagerResponse
+from drongo.services.secretmanager.responses import SecretManagerResponse
 
 __all__ = [
     "SecretManagerBackend",

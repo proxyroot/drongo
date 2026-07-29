@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 from google.api_core import exceptions as gexc
 
-pytestmark = pytest.mark.usefixtures("gato")
+pytestmark = pytest.mark.usefixtures("drongo")
 
 PROJECT = "projects/test-project"
 
@@ -105,7 +105,7 @@ def test_access_missing_secret_raises() -> None:
 
 
 def test_secrets_are_isolated_per_project() -> None:
-    from gato import get_backend
+    from drongo import get_backend
 
     client = _client()
     client.create_secret(

@@ -1,12 +1,12 @@
 <!-- markdownlint-disable MD033 MD041 -->
-<h1 align="center">🐱 gato</h1>
+<h1 align="center">🐦 drongo</h1>
 
 <p align="center">
   <strong>Mock Google Cloud Platform services in your tests - the <a href="https://github.com/getmoto/moto">moto</a> for GCP.</strong>
 </p>
 
 <p align="center">
-  <a href="https://github.com/proxyroot/gato/actions/workflows/ci.yml"><img src="https://github.com/proxyroot/gato/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/proxyroot/drongo/actions/workflows/ci.yml"><img src="https://github.com/proxyroot/drongo/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-blue.svg" alt="License: Apache 2.0"></a>
   <img src="https://img.shields.io/badge/python-3.10%2B-blue.svg" alt="Python 3.10+">
   <img src="https://img.shields.io/badge/typed-yes-brightgreen.svg" alt="Typed">
@@ -14,43 +14,44 @@
 
 ---
 
-`gato` lets you test code that talks to Google Cloud **without touching the
+`drongo` lets you test code that talks to Google Cloud **without touching the
 network, running an emulator, or paying for real resources**. It stands up an
 in-memory, in-process fake of GCP service APIs and transparently intercepts the
 requests your google-cloud client libraries make.
 
-If you've used [`moto`](https://github.com/getmoto/moto) for AWS, `gato` will
+If you've used [`moto`](https://github.com/getmoto/moto) for AWS, `drongo` will
 feel immediately familiar - that's on purpose.
 
-> **Why "gato"?** `boto` (the AWS SDK) is named after the Amazon river dolphin,
-> continuing a tradition of Brazilian-Portuguese animal names; `moto` mocks
-> `boto`. `gato` - Portuguese for **cat** - keeps the theme going for **G**oogle
-> Cloud. 🐱
+> **Why "drongo"?** `boto` (the AWS SDK) is named after the boto, the Amazon
+> river dolphin, and `moto` mocks `boto`. The **drongo** is a bird famed for
+> vocal mimicry: the fork-tailed drongo copies other animals' alarm calls to
+> fool them into dropping their food. That is exactly what a mock does, so
+> `drongo` does it for Google Cloud. 🐦
 
 ## Features
 
 - 🎯 **One decorator** - `@mock_gcp` patches every supported service, just like `@mock_aws`.
 - 🔌 **Flexible** - use it as a decorator, a context manager, a class decorator, or a `unittest.TestCase` mixin.
 - 🧠 **In-memory & fast** - no Docker, no emulators, no sockets; tests run in milliseconds.
-- 🌐 **Standalone server** - `gato server` speaks real HTTP so SDKs in *any* language can point at it.
-- 🧪 **pytest-native** - a `gato` fixture is auto-registered on install.
+- 🌐 **Standalone server** - `drongo server` speaks real HTTP so SDKs in *any* language can point at it.
+- 🧪 **pytest-native** - a `drongo` fixture is auto-registered on install.
 - 🧩 **Extensible** - adding a service is `models.py` + `responses.py` + `urls.py`, the same shape as moto.
 - ✅ **Typed** - ships `py.typed`, checked with mypy.
 
 ## Installation
 
 ```bash
-pip install gato
+pip install drongo
 ```
 
-`gato` does **not** depend on the google-cloud client libraries - you bring your
+`drongo` does **not** depend on the google-cloud client libraries - you bring your
 own (`google-cloud-storage`, `google-cloud-secret-manager`, …). It mocks
 whatever you already use.
 
 ## Quickstart
 
 ```python
-from gato import mock_gcp
+from drongo import mock_gcp
 
 
 @mock_gcp
@@ -60,20 +61,22 @@ def test_upload_download():
     client = storage.Client(project="my-project")
     bucket = client.create_bucket("my-bucket")
 
-    bucket.blob("hello.txt").upload_from_string("hello gato", content_type="text/plain")
+    bucket.blob("hello.txt").upload_from_string(
+        "hello drongo", content_type="text/plain"
+    )
 
-    assert bucket.blob("hello.txt").download_as_text() == "hello gato"
+    assert bucket.blob("hello.txt").download_as_text() == "hello drongo"
     assert [b.name for b in client.list_blobs("my-bucket")] == ["hello.txt"]
 ```
 
 No credentials, no network, no emulator. `storage.Client()` works with or
-without arguments - `gato` supplies anonymous credentials and a default project
+without arguments - `drongo` supplies anonymous credentials and a default project
 while a mock scope is active.
 
 ### Every way to invoke it (all like moto)
 
 ```python
-from gato import mock_gcp
+from drongo import mock_gcp
 
 
 # 1. Bare decorator
@@ -101,21 +104,21 @@ class TestSuite:
 ### pytest fixture
 
 ```python
-def test_with_fixture(gato):
+def test_with_fixture(drongo):
     from google.cloud import storage
 
     storage.Client(project="p").create_bucket("b")
 
     # Inspect raw backend state, moto-style.
-    assert "b" in gato.backend("storage").buckets
+    assert "b" in drongo.backend("storage").buckets
 ```
 
 ### Secret Manager
 
-Construct the client with the REST transport so `gato` can intercept it:
+Construct the client with the REST transport so `drongo` can intercept it:
 
 ```python
-from gato import mock_gcp
+from drongo import mock_gcp
 
 
 @mock_gcp
@@ -142,11 +145,11 @@ def test_secret():
 
 ## Standalone server mode
 
-Run gato as a real HTTP server - the same trick as `moto_server` - so
+Run drongo as a real HTTP server - the same trick as `moto_server` - so
 non-Python SDKs, or the google libraries in emulator mode, can use it:
 
 ```bash
-gato server --port 9090
+drongo server --port 9090
 export STORAGE_EMULATOR_HOST=http://localhost:9090
 ```
 
@@ -155,7 +158,7 @@ from google.cloud import storage
 from google.auth.credentials import AnonymousCredentials
 
 client = storage.Client(project="p", credentials=AnonymousCredentials())
-client.create_bucket("b")  # served by the gato server over HTTP
+client.create_bucket("b")  # served by the drongo server over HTTP
 ```
 
 ## Supported services
@@ -170,7 +173,7 @@ mechanical - see [`docs/contributing-a-service.md`](docs/contributing-a-service.
 
 ## How it works
 
-`gato` mirrors moto's architecture, adapted from AWS/botocore to GCP's
+`drongo` mirrors moto's architecture, adapted from AWS/botocore to GCP's
 REST+JSON APIs:
 
 - **`mock_gcp`** starts a reentrant controller that (a) activates the
@@ -195,7 +198,7 @@ See [`docs/architecture.md`](docs/architecture.md) for the full tour.
 - [ ] Resource Manager (projects)
 - [ ] gRPC transport interception (currently REST/JSON)
 
-Want one sooner? [Open an issue](https://github.com/proxyroot/gato/issues/new/choose)
+Want one sooner? [Open an issue](https://github.com/proxyroot/drongo/issues/new/choose)
 or contribute it - see below.
 
 ## Contributing
@@ -205,8 +208,8 @@ Contributions are very welcome! Adding a service is a great first PR. Start with
 [`docs/contributing-a-service.md`](docs/contributing-a-service.md).
 
 ```bash
-git clone https://github.com/proxyroot/gato
-cd gato
+git clone https://github.com/proxyroot/drongo
+cd drongo
 make install   # editable install + dev tools
 make check     # ruff + mypy + pytest
 ```
@@ -217,6 +220,6 @@ make check     # ruff + mypy + pytest
 
 ## Acknowledgements
 
-`gato` is heavily inspired by [`moto`](https://github.com/getmoto/moto) and owes
+`drongo` is heavily inspired by [`moto`](https://github.com/getmoto/moto) and owes
 its design to that project. It is **not** affiliated with or endorsed by Google
 or the moto maintainers.

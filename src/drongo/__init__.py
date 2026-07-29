@@ -1,13 +1,13 @@
-"""gato - mock Google Cloud Platform services in your tests.
+"""drongo - mock Google Cloud Platform services in your tests.
 
-gato is to Google Cloud what `moto <https://github.com/getmoto/moto>`_ is to AWS:
+drongo is to Google Cloud what `moto <https://github.com/getmoto/moto>`_ is to AWS:
 an in-memory, in-process fake of GCP service APIs so you can test code that talks
 to Google Cloud without touching the network, standing up an emulator, or paying
 for real resources.
 
 Basic usage::
 
-    from gato import mock_gcp
+    from drongo import mock_gcp
 
     @mock_gcp
     def test_upload():
@@ -22,12 +22,12 @@ Basic usage::
 
 from __future__ import annotations
 
-from gato.core.decorator import mock_gcp
-from gato.core.exceptions import GatoHttpError
-from gato.core.registry import get_backend, reset_all_backends
+from drongo.core.decorator import mock_gcp
+from drongo.core.exceptions import DrongoHttpError
+from drongo.core.registry import get_backend, reset_all_backends
 
 __all__ = [
-    "GatoHttpError",
+    "DrongoHttpError",
     "__version__",
     "get_backend",
     "mock_gcp",

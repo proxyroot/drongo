@@ -1,6 +1,6 @@
 # Architecture
 
-`gato` deliberately mirrors [`moto`](https://github.com/getmoto/moto), adapted
+`drongo` deliberately mirrors [`moto`](https://github.com/getmoto/moto), adapted
 from AWS/botocore to GCP's REST + JSON (and gRPC-over-REST) APIs.
 
 ## The big picture
@@ -25,8 +25,8 @@ your test code
 
 ### `mock_gcp` and the controller (`core/decorator.py`)
 
-`mock_gcp` returns a `GatoMock` that drives a process-wide, **reentrant**
-`GatoController`. On the outermost `start()` it:
+`mock_gcp` returns a `DrongoMock` that drives a process-wide, **reentrant**
+`DrongoController`. On the outermost `start()` it:
 
 1. resets every backend to empty state,
 2. starts a [`responses`](https://github.com/getsentry/responses) mock and
@@ -43,7 +43,7 @@ semantics as nested `mock_aws`.
 The google client libraries send REST traffic through
 `google.auth.transport.requests.AuthorizedSession`, a `requests.Session`
 subclass. `responses` patches `requests`, so registering broad per-host
-callbacks lets `gato` serve every call from memory - no sockets. This is the GCP
+callbacks lets `drongo` serve every call from memory - no sockets. This is the GCP
 analogue of moto's botocore stubber.
 
 > gRPC-only calls are not intercepted yet. Services whose clients default to
@@ -79,12 +79,12 @@ the route tables, the server and in-process modes never drift.
 ## Directory layout
 
 ```
-src/gato/
+src/drongo/
 ├── __init__.py            # public API: mock_gcp, get_backend, __version__
 ├── backends.py            # moto-style get_backend accessor
-├── cli.py                 # `gato` CLI (server, services)
+├── cli.py                 # `drongo` CLI (server, services)
 ├── server.py              # standalone HTTP server
-├── pytest_plugin.py       # the `gato` fixture
+├── pytest_plugin.py       # the `drongo` fixture
 ├── core/
 │   ├── backend.py         # BaseBackend, BackendDict
 │   ├── responses.py       # BaseResponse, Request, dispatch

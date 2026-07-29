@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 from google.api_core import exceptions as gexc
 
-pytestmark = pytest.mark.usefixtures("gato")
+pytestmark = pytest.mark.usefixtures("drongo")
 
 
 def _bucket(name: str = "data"):

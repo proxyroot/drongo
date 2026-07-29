@@ -1,0 +1,29 @@
+name: Release Drafter
+
+# Keeps a DRAFT GitHub Release continuously up to date from merged PRs. Drafting
+# happens only on pushes to `main` (which, with branch protection, only the
+# repository owner/maintainers can do), and the job is pinned to the owner's
+# repository so it never runs in forks. Publishing that draft is a manual,
+# owner-only action in the GitHub UI, which then triggers the Release workflow
+# to publish to PyPI.
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  update_release_draft:
+    name: Update release draft
+    runs-on: ubuntu-latest
+    # Only ever run in the owner's repository (never in forks).
+    if: github.repository_owner == 'proxyroot'
+    permissions:
+      contents: write # create/update the draft release
+    steps:
+      - uses: release-drafter/release-drafter@v6
+        with:
+          config-name: release-drafter.yml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

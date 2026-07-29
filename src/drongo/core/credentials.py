@@ -2,7 +2,7 @@
 
 Outside a real GCP environment, ``google.auth.default()`` raises
 ``DefaultCredentialsError`` and client libraries try to contact the metadata
-server or an OAuth token endpoint. While a :func:`gato.mock_gcp` scope is active
+server or an OAuth token endpoint. While a :func:`drongo.mock_gcp` scope is active
 we patch credential discovery to hand back anonymous credentials and a default
 project, so ``storage.Client()`` "just works" with no arguments - the moral
 equivalent of moto seeding dummy ``AWS_ACCESS_KEY_ID``/``AWS_SECRET_ACCESS_KEY``.
@@ -17,7 +17,7 @@ from unittest import mock
 
 #: Project returned by the patched ``google.auth.default`` when the caller does
 #: not specify one.
-DEFAULT_PROJECT = "gato-test-project"
+DEFAULT_PROJECT = "drongo-test-project"
 
 
 def build_patchers() -> list[mock._patch]:

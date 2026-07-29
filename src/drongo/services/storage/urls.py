@@ -1,14 +1,14 @@
 """URL routing table for Cloud Storage (moto-style ``url_bases``/``url_paths``).
 
 ``url_paths`` maps ``"<METHOD> <path-regex>"`` to a
-:class:`~gato.services.storage.responses.StorageResponse` handler. The path
+:class:`~drongo.services.storage.responses.StorageResponse` handler. The path
 regex is matched against the URL path with :func:`re.fullmatch`; the first match
 wins, so more specific paths are listed first.
 """
 
 from __future__ import annotations
 
-from gato.services.storage.responses import StorageResponse
+from drongo.services.storage.responses import StorageResponse
 
 url_bases = [r"https?://storage\.googleapis\.com"]
 

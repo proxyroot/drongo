@@ -22,8 +22,8 @@ from typing import Any, TypeVar
 
 import responses
 
-from gato.core import registry
-from gato.core.credentials import build_patchers
+from drongo.core import registry
+from drongo.core.credentials import build_patchers
 
 F = TypeVar("F", bound=Callable[..., Any])
 
@@ -34,12 +34,12 @@ def _load_services() -> None:
     """Import the services package once so every service self-registers."""
     global _SERVICES_LOADED
     if not _SERVICES_LOADED:
-        import gato.services  # noqa: F401  (import for side effects)
+        import drongo.services  # noqa: F401  (import for side effects)
 
         _SERVICES_LOADED = True
 
 
-class GatoController:
+class DrongoController:
     """Process-wide, reentrant controller for the interception layer."""
 
     def __init__(self) -> None:
@@ -89,10 +89,10 @@ class GatoController:
 
 
 #: The single shared controller for the whole process.
-_CONTROLLER = GatoController()
+_CONTROLLER = DrongoController()
 
 
-class GatoMock:
+class DrongoMock:
     """Decorator / context-manager object returned by :func:`mock_gcp`."""
 
     def __init__(self) -> None:
@@ -100,7 +100,7 @@ class GatoMock:
 
     # -- context manager ---------------------------------------------------
 
-    def __enter__(self) -> GatoMock:
+    def __enter__(self) -> DrongoMock:
         self._controller.start()
         return self
 
@@ -125,7 +125,7 @@ class GatoMock:
     def _decorate_callable(self, func: F) -> F:
         @wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
-            with GatoMock():
+            with DrongoMock():
                 return func(*args, **kwargs)
 
         return wrapper  # type: ignore[return-value]
@@ -146,8 +146,8 @@ class GatoMock:
         orig_teardown = klass.tearDown
 
         def setUp(inner_self: Any) -> None:
-            mocker = GatoMock()
-            inner_self._gato_mock = mocker
+            mocker = DrongoMock()
+            inner_self._drongo_mock = mocker
             mocker.start()
             orig_setup(inner_self)
 
@@ -155,7 +155,7 @@ class GatoMock:
             try:
                 orig_teardown(inner_self)
             finally:
-                inner_self._gato_mock.stop()
+                inner_self._drongo_mock.stop()
 
         # Dynamically wrap the fixture hooks; setattr keeps mypy out of the way.
         setattr(klass, "setUp", setUp)  # noqa: B010
@@ -164,12 +164,12 @@ class GatoMock:
 
 
 def mock_gcp(func: Any = None) -> Any:
-    """Mock every gato-supported Google Cloud service.
+    """Mock every drongo-supported Google Cloud service.
 
     Works as a bare decorator, a called decorator, a context manager, or a class
     decorator. See the module docstring for examples.
     """
-    mocker = GatoMock()
+    mocker = DrongoMock()
     if func is not None:
         return mocker(func)
     return mocker

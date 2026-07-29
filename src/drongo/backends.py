@@ -2,8 +2,8 @@
 
 Example::
 
-    from gato import mock_gcp
-    from gato.backends import get_backend
+    from drongo import mock_gcp
+    from drongo.backends import get_backend
 
     with mock_gcp():
         storage.Client(project="p").create_bucket("b")
@@ -12,6 +12,6 @@ Example::
 
 from __future__ import annotations
 
-from gato.core.registry import get_backend
+from drongo.core.registry import get_backend
 
 __all__ = ["get_backend"]
