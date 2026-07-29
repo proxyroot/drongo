@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Pub/Sub** mock. Pub/Sub is gRPC-first, so drongo runs an in-process gRPC
+  emulator (redirected via `PUBSUB_EMULATOR_HOST`) backed by the same in-memory
+  model layer as the HTTP services. The normal (default-transport) client works
+  with no code change. Covers topics, subscriptions, publish fan-out, pull,
+  acknowledge, and nack via `modifyAckDeadline(0)`.
+- Core `BaseEmulator` abstraction so gRPC-first services can be mocked alongside
+  the HTTP interception layer; `ServiceDefinition` now accepts an `emulator`.
+
+### Fixed
+
+- Standalone server skips services with no HTTP router (gRPC-only services)
+  instead of raising.
+
 ## [0.1.0] - 2026-07-28
 
 ### Added

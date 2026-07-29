@@ -143,6 +143,41 @@ def test_secret():
     assert accessed.payload.data == b"s3cr3t"
 ```
 
+### Pub/Sub
+
+Pub/Sub is gRPC-first, so drongo runs an in-process gRPC emulator. Your code
+uses the **normal** client with its default transport, unchanged:
+
+```python
+from drongo import mock_gcp
+
+
+@mock_gcp
+def test_pubsub():
+    from google.cloud import pubsub_v1
+
+    publisher = pubsub_v1.PublisherClient()  # default gRPC, no code change
+    subscriber = pubsub_v1.SubscriberClient()
+    topic = "projects/my-project/topics/orders"
+    subscription = "projects/my-project/subscriptions/worker"
+
+    publisher.create_topic(request={"name": topic})
+    subscriber.create_subscription(request={"name": subscription, "topic": topic})
+
+    publisher.publish(topic, b'{"id": 1}', kind="order").result()
+
+    response = subscriber.pull(
+        request={"subscription": subscription, "max_messages": 10}
+    )
+    assert response.received_messages[0].message.data == b'{"id": 1}'
+    subscriber.acknowledge(
+        request={
+            "subscription": subscription,
+            "ack_ids": [response.received_messages[0].ack_id],
+        }
+    )
+```
+
 ## Standalone server mode
 
 Run drongo as a real HTTP server - the same trick as `moto_server` - so
@@ -167,6 +202,7 @@ client.create_bucket("b")  # served by the drongo server over HTTP
 | --- | --- | --- |
 | **Cloud Storage** | JSON API (default) | buckets, objects, multipart/simple/resumable uploads, downloads (incl. Range), list w/ prefix & delimiter, copy/rewrite, metadata |
 | **Secret Manager** | REST (`transport="rest"`) | secrets, versions, access, enable/disable/destroy, list |
+| **Pub/Sub** | gRPC (default, via emulator) | topics, subscriptions, publish fan-out, pull/ack, nack (modifyAckDeadline), list/delete |
 
 More services are on the [roadmap](#roadmap). Adding one is intentionally
 mechanical - see [`docs/contributing-a-service.md`](docs/contributing-a-service.md).
@@ -179,24 +215,27 @@ REST+JSON APIs:
 - **`mock_gcp`** starts a reentrant controller that (a) activates the
   [`responses`](https://github.com/getsentry/responses) HTTP interception layer
   and (b) patches `google.auth.default` to return anonymous credentials.
-- Each service ships a **`models.py`** (in-memory state), a **`responses.py`**
+- HTTP/REST services ship a **`models.py`** (in-memory state), a **`responses.py`**
   (a `BaseResponse` subclass with one method per API call), and a **`urls.py`**
   (`url_bases` + `url_paths`) - the same trio moto uses.
+- gRPC-first services (Pub/Sub) can't be intercepted via HTTP, so drongo runs an
+  in-process **gRPC emulator** backed by the same `models.py` and redirects the
+  client with the standard `PUBSUB_EMULATOR_HOST` env var. Your code keeps its
+  default transport; nothing changes.
 - Backends are sharded through a **`BackendDict` keyed by project** (moto keys by
   account + region). Globally-namespaced resources like buckets share one
   backend, exactly as moto special-cases S3.
-- The **standalone server** replays those same route tables over a real socket.
+- The **standalone server** replays the HTTP route tables over a real socket.
 
 See [`docs/architecture.md`](docs/architecture.md) for the full tour.
 
 ## Roadmap
 
-- [ ] Pub/Sub
-- [ ] Firestore
+- [x] Pub/Sub (in-process gRPC emulator)
+- [ ] Firestore (gRPC emulator)
 - [ ] BigQuery
 - [ ] Cloud Tasks
 - [ ] Resource Manager (projects)
-- [ ] gRPC transport interception (currently REST/JSON)
 
 Want one sooner? [Open an issue](https://github.com/proxyroot/drongo/issues/new/choose)
 or contribute it - see below.
