@@ -46,8 +46,21 @@ subclass. `responses` patches `requests`, so registering broad per-host
 callbacks lets `drongo` serve every call from memory - no sockets. This is the GCP
 analogue of moto's botocore stubber.
 
-> gRPC-only calls are not intercepted yet. Services whose clients default to
-> gRPC (Secret Manager, Pub/Sub, …) are used with `transport="rest"`.
+### Emulators for gRPC (`core/emulator.py`)
+
+gRPC cannot be intercepted the `responses` way: `grpcio` is a compiled HTTP/2
+stack with no pure-Python seam to patch, and payloads are binary Protobuf over
+multiplexed streams. So gRPC-first services (Pub/Sub) implement a
+`BaseEmulator`: `mock_gcp` starts a real in-process gRPC server backed by the
+service's `models.py` and points the client at it via the standard
+`PUBSUB_EMULATOR_HOST` env var, exactly how Google's own emulators work. The
+client uses its default transport with no code change. The Pub/Sub server is
+built from generic gRPC handlers using the client library's own proto-plus
+(de)serializers, so no generated servicer classes are needed, and it is created
+once and reused across scopes (state is reset between scopes).
+
+A service provides an HTTP `response` router, a gRPC `emulator`, or both; the
+controller wires up whichever are present.
 
 ### `BaseResponse` (`core/responses.py`)
 
@@ -87,7 +100,8 @@ src/drongo/
 ├── pytest_plugin.py       # the `drongo` fixture
 ├── core/
 │   ├── backend.py         # BaseBackend, BackendDict
-│   ├── responses.py       # BaseResponse, Request, dispatch
+│   ├── responses.py       # BaseResponse, Request, dispatch (HTTP)
+│   ├── emulator.py        # BaseEmulator (gRPC in-process servers)
 │   ├── registry.py        # ServiceDefinition + get_backend
 │   ├── decorator.py       # mock_gcp + controller
 │   ├── credentials.py     # anonymous-credential patching
@@ -95,5 +109,6 @@ src/drongo/
 │   └── utils.py           # timestamps, checksums
 └── services/
     ├── storage/           # models.py + responses.py + urls.py
-    └── secretmanager/     # models.py + responses.py + urls.py
+    ├── secretmanager/     # models.py + responses.py + urls.py
+    └── pubsub/            # models.py + emulator.py (gRPC)
 ```

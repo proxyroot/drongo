@@ -55,6 +55,9 @@ class DrongoHTTPRequestHandler(BaseHTTPRequestHandler):
 
         with _LOCK:
             for service in registry.iter_services():
+                # gRPC-only services (e.g. pubsub) have no HTTP router.
+                if service.response is None:
+                    continue
                 response = service.response.handle(request)
                 if response is not None:
                     self._write(response)

@@ -12,16 +12,23 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from drongo.core.backend import BackendDict
+from drongo.core.emulator import BaseEmulator
 from drongo.core.responses import BaseResponse
 
 
 @dataclass(frozen=True)
 class ServiceDefinition:
-    """Everything the engine needs to mock one GCP service."""
+    """Everything the engine needs to mock one GCP service.
+
+    A service provides a project-keyed ``backends`` plus at least one interception
+    mechanism: an HTTP ``response`` router (for REST/JSON services) and/or an
+    ``emulator`` (an in-process server for gRPC-first services).
+    """
 
     name: str
     backends: BackendDict
-    response: BaseResponse
+    response: BaseResponse | None = None
+    emulator: BaseEmulator | None = None
 
 
 _SERVICES: dict[str, ServiceDefinition] = {}

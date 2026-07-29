@@ -98,11 +98,23 @@ through `mock_gcp` (or the `drongo` fixture). Assert on client-observable behavi
 first, and optionally on raw backend state via
 `get_backend("widgets")["project"]`.
 
+## gRPC-first services (no REST transport)
+
+Some services (Pub/Sub, Firestore) default to gRPC and cannot be intercepted via
+HTTP. Instead of `responses.py` + `urls.py`, add an `emulator.py` with a
+`BaseEmulator` (see `drongo/services/pubsub/emulator.py`): it starts an
+in-process gRPC server backed by your `models.py` and redirects the client with
+the service's `*_EMULATOR_HOST` env var. Build the server from generic gRPC
+handlers using the client library's own proto-plus (de)serializers, so no
+generated servicer classes are needed. Register the service with
+`ServiceDefinition(name=..., backends=..., emulator=...)`.
+
 ## Tips
 
 - Find the exact URLs/JSON shapes by capturing a request: register a `responses`
   callback and print `request.url` / `request.body` (see how the storage
-  multipart parser was reverse-engineered).
+  multipart parser was reverse-engineered). For gRPC, capture the method paths
+  and message types the same way against a stub server.
 - Get the **HTTP status codes** right - the client maps them to
-  `google.api_core.exceptions` subclasses.
+  `google.api_core.exceptions` subclasses. For gRPC, map to `grpc.StatusCode`.
 - Run `make check` before opening a PR.

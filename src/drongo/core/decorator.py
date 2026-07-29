@@ -46,6 +46,7 @@ class DrongoController:
         self._depth = 0
         self._responses: responses.RequestsMock | None = None
         self._patchers: list[Any] = []
+        self._emulators: list[Any] = []
 
     @property
     def active(self) -> bool:
@@ -59,9 +60,11 @@ class DrongoController:
         _load_services()
         registry.reset_all_backends()
 
+        # HTTP interception for REST/JSON services.
         mock = responses.RequestsMock(assert_all_requests_are_fired=False)
         for service in registry.iter_services():
-            service.response.register(mock)
+            if service.response is not None:
+                service.response.register(mock)
         mock.start()
         self._responses = mock
 
@@ -69,12 +72,24 @@ class DrongoController:
         for patcher in self._patchers:
             patcher.start()
 
+        # In-process emulators for gRPC-first services (e.g. Pub/Sub). Each is
+        # lazy and graceful: start() no-ops if its libraries are unavailable.
+        self._emulators = []
+        for service in registry.iter_services():
+            if service.emulator is not None:
+                service.emulator.start()
+                self._emulators.append(service.emulator)
+
     def stop(self) -> None:
         if self._depth == 0:
             return
         self._depth -= 1
         if self._depth > 0:
             return  # inner scope closed; outer scope still owns the mocks
+
+        for emulator in reversed(self._emulators):
+            emulator.stop()
+        self._emulators = []
 
         for patcher in reversed(self._patchers):
             patcher.stop()

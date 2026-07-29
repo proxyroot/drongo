@@ -36,8 +36,25 @@ Backend: per-project.
 | Enable / disable / destroy version | ✅ |
 | IAM policy | ⬜ |
 
+## Pub/Sub (`pubsub`)
+
+Client: `google-cloud-pubsub` · Transport: gRPC (default), served by an
+in-process gRPC emulator via `PUBSUB_EMULATOR_HOST` · Backend: global namespace.
+Use the normal client with no `transport` argument.
+
+| Operation | Status |
+| --- | --- |
+| Create / get / list / delete topic | ✅ |
+| Create / get / list / delete subscription | ✅ |
+| Publish (with attributes, fan-out to all subs) | ✅ |
+| Pull / acknowledge | ✅ |
+| Nack via `modifyAckDeadline(0)` (redelivery) | ✅ |
+| Streaming pull (`subscribe()`) | ⬜ |
+| Ack-deadline expiry / retention | ⬜ |
+| IAM, schemas, snapshots, seek | ⬜ |
+
 ## Planned
 
-Pub/Sub · Firestore · BigQuery · Cloud Tasks · Resource Manager. See the
+Firestore · BigQuery · Cloud Tasks · Resource Manager. See the
 [roadmap](../README.md#roadmap) and
 [open a service request](https://github.com/proxyroot/drongo/issues/new/choose).

@@ -54,6 +54,7 @@ test = [
     "pytest-cov>=4.1",
     "google-cloud-storage>=2.14",
     "google-cloud-secret-manager>=2.16",
+    "google-cloud-pubsub>=2.18",
 ]
 dev = [
     "drongo[test]",
@@ -120,7 +121,7 @@ warn_unreachable = true
 pretty = true
 
 [[tool.mypy.overrides]]
-module = ["responses.*", "google.*", "google_crc32c.*"]
+module = ["responses.*", "google.*", "google_crc32c.*", "grpc", "grpc.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
