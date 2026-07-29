@@ -84,6 +84,22 @@ def test_queue_control():
     assert list(client.list_tasks(request={"parent": QUEUE})) == []
 ```
 
+## Run your actual code
+
+Register a handler for a queue and drongo delivers dispatched tasks to it (a
+running queue delivers on `create_task`; `run_task` always delivers). The handler
+receives a `TaskRequest` with the target `url`, `method`, `headers`, and `body`.
+See [Executable handlers](../executable-handlers.md).
+
+```python
+from drongo import cloudtasks
+
+
+@cloudtasks.task_handler("projects/p/locations/us-central1/queues/emails")
+def handle(request):
+    send(request.body)  # runs when a task dispatches
+```
+
 ## Coverage
 
 | Operation | Status |
@@ -92,5 +108,6 @@ def test_queue_control():
 | Pause / resume / purge queue | Supported |
 | Create / get / list / delete task | Supported |
 | `run_task` (marks dispatched) | Supported |
+| Executable handler (dispatch runs your function) | Supported |
 | Actual task dispatch / delivery to targets | Planned (no real network I/O) |
 | Retry config, rate limits, IAM | Planned |

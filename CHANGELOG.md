@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Executable handlers**: opt-in Python callables that drongo actually runs when
+  an action fires, so a test exercises the full producer -> consumer path
+  in-process. `cloudrun.job_handler` runs on `run_job` (a raise marks the
+  execution failed); `cloudtasks.task_handler` receives a `TaskRequest` when a
+  task dispatches (a running queue delivers on `create_task`); and
+  `pubsub.subscription_handler` receives a `PushMessage` on publish (returning
+  acks, raising redelivers). Each also has a `register_handler` backend method.
 - **Fake data generators** (`drongo.seed`, optional `drongo[faker]`): populate the
   mocked services with realistic Faker data. `seed.bigquery_rows` (typed by
   schema), `seed.storage_blobs`, and `seed.pubsub_messages`, with `overrides` and

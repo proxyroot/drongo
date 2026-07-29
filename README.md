@@ -68,6 +68,7 @@ class decorator, or a `unittest.TestCase` mixin, and ships an auto-registered
 - 🔌 **Flexible** - decorator, context manager, class decorator, or `unittest.TestCase` mixin.
 - 🧠 **In-memory & fast** - no Docker, no emulators, no sockets; tests run in milliseconds.
 - 🧬 **Default clients, unchanged** - drongo handles gRPC-first services behind the scenes.
+- 🏃 **Runs your code** - opt-in [executable handlers](https://drongo.proxyroot.com/executable-handlers/) actually run your Python when a job runs, a task dispatches, or a message publishes.
 - 🌐 **Standalone server** - `drongo server` speaks real HTTP so SDKs in *any* language can point at it.
 - 🧪 **pytest-native** - a `drongo` fixture is auto-registered on install.
 - 🧩 **Extensible** - adding a service is `models.py` + `responses.py` + `urls.py`, the same shape as moto.

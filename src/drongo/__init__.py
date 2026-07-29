@@ -22,9 +22,18 @@ Basic usage::
 
 from __future__ import annotations
 
+import importlib
+from types import ModuleType
+
 from drongo.core.decorator import mock_gcp
 from drongo.core.exceptions import DrongoHttpError
 from drongo.core.registry import get_backend, reset_all_backends
+
+#: Service subpackages reachable as ``drongo.<name>`` (e.g. ``drongo.cloudrun``)
+#: for their public helpers, such as the executable-handler decorators.
+_SERVICE_MODULES = frozenset(
+    {"bigquery", "cloudrun", "cloudtasks", "pubsub", "secretmanager", "storage"}
+)
 
 __all__ = [
     "DrongoHttpError",
@@ -32,7 +41,20 @@ __all__ = [
     "get_backend",
     "mock_gcp",
     "reset_all_backends",
+    *sorted(_SERVICE_MODULES),
 ]
+
+
+def __getattr__(name: str) -> ModuleType:
+    """Lazily import a service subpackage as an attribute of ``drongo``.
+
+    Keeps ``import drongo`` cheap while allowing ``from drongo import cloudrun``
+    (and ``drongo.cloudrun.job_handler(...)``) without an eager import cycle.
+    """
+    if name in _SERVICE_MODULES:
+        return importlib.import_module(f"drongo.services.{name}")
+    raise AttributeError(f"module 'drongo' has no attribute {name!r}")
+
 
 # The version is derived from the git tag at build time by hatch-vcs, which
 # writes ``_version.py``. The fallback keeps imports working in a source tree

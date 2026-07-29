@@ -108,6 +108,21 @@ def test_nack_redelivers():
     assert again.received_messages[0].message.data == b"retry-me"
 ```
 
+## Run your actual code
+
+Register a callback for a subscription and drongo pushes each published message
+to it (returning acks; raising or `nack()` redelivers to the pullable backlog).
+See [Executable handlers](../executable-handlers.md).
+
+```python
+from drongo import pubsub
+
+
+@pubsub.subscription_handler("projects/p/subscriptions/worker")
+def on_message(message):
+    process(message.data)  # runs on publish
+```
+
 ## Coverage
 
 | Operation | Status |
@@ -116,6 +131,7 @@ def test_nack_redelivers():
 | Create / get / list / delete subscription | Supported |
 | Publish (with attributes, fan-out to all subs) | Supported |
 | Pull / acknowledge | Supported |
+| Executable handler (publish pushes to your callback) | Supported |
 | Nack via `modify_ack_deadline(0)` (redelivery) | Supported |
 | Streaming pull (`subscribe()`) | Planned |
 | Ack-deadline expiry / retention | Planned |
