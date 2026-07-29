@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling>=1.21"]
+requires = ["hatchling>=1.31.0"]
 build-backend = "hatchling.build"
 
 [project]
@@ -35,8 +35,8 @@ classifiers = [
     "Typing :: Typed",
 ]
 dependencies = [
-    "responses>=0.25",
-    "requests>=2.31",
+    "responses>=0.26.2",
+    "requests>=2.34.2",
 ]
 
 [project.urls]
@@ -50,16 +50,16 @@ Changelog = "https://github.com/proxyroot/gato/blob/main/CHANGELOG.md"
 # them, so users bring their own. They are only needed to run gato's own tests.
 [project.optional-dependencies]
 test = [
-    "pytest>=7.4",
-    "pytest-cov>=4.1",
-    "google-cloud-storage>=2.14",
-    "google-cloud-secret-manager>=2.16",
+    "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
+    "google-cloud-storage>=3.13.0",
+    "google-cloud-secret-manager>=2.30.0",
 ]
 dev = [
     "gato[test]",
-    "ruff>=0.6",
-    "mypy>=1.10",
-    "pre-commit>=3.5",
+    "ruff>=0.16.0",
+    "mypy>=2.3.0",
+    "pre-commit>=4.6.1",
     "types-requests",
 ]
 
