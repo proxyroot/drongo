@@ -14,8 +14,10 @@ Analogy to moto's SQS:
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from typing import Any
 
 from drongo.core import exceptions
 from drongo.core.backend import BackendDict, BaseBackend
@@ -34,6 +36,32 @@ class Message:
     message_id: str = ""
     publish_time: datetime = field(default_factory=_now)
     ordering_key: str = ""
+
+
+class PushMessage:
+    """What a subscription handler receives (push-style delivery).
+
+    Returning from the handler normally acknowledges the message; raising or
+    calling :meth:`nack` returns it to the backlog so it can still be pulled.
+    """
+
+    def __init__(self, message: Message) -> None:
+        self.data = message.data
+        self.attributes = message.attributes
+        self.message_id = message.message_id
+        self.ordering_key = message.ordering_key
+        self.publish_time = message.publish_time
+        self._acked: bool | None = None
+
+    def ack(self) -> None:
+        self._acked = True
+
+    def nack(self) -> None:
+        self._acked = False
+
+
+#: A subscription handler receives each delivered :class:`PushMessage`.
+SubscriptionHandler = Callable[[PushMessage], Any]
 
 
 @dataclass
@@ -68,11 +96,38 @@ class PubSubBackend(BaseBackend):
     def setup(self) -> None:
         self.topics: dict[str, Topic] = {}
         self.subscriptions: dict[str, Subscription] = {}
+        self.handlers: dict[str, SubscriptionHandler] = {}
         self._counter = 0
 
     def _next(self) -> int:
         self._counter += 1
         return self._counter
+
+    def register_handler(
+        self, subscription_name: str, handler: SubscriptionHandler
+    ) -> None:
+        """Bind a callback to a subscription; publishes are pushed to it."""
+        self.handlers[subscription_name] = handler
+
+    def _deliver(self, subscription: Subscription, message: Message) -> None:
+        """Push ``message`` to the subscription's handler, or enqueue it.
+
+        With no handler the message lands in the pullable backlog (the existing
+        pull model). With a handler it is delivered immediately; a normal return
+        acks it, while a raise or ``nack()`` returns it to the backlog.
+        """
+        handler = self.handlers.get(subscription.name)
+        if handler is None:
+            subscription.backlog.append(message)
+            return
+        push = PushMessage(message)
+        try:
+            handler(push)
+            acked = push._acked is not False
+        except Exception:  # noqa: BLE001 - a failed push is a nack (redeliver)
+            acked = False
+        if not acked:
+            subscription.backlog.append(message)
 
     # -- topics ------------------------------------------------------------
 
@@ -108,13 +163,14 @@ class PubSubBackend(BaseBackend):
             ids.append(message_id)
             for subscription in self.subscriptions.values():
                 if subscription.topic == topic_name:
-                    subscription.backlog.append(
+                    self._deliver(
+                        subscription,
                         Message(
                             data=data,
                             attributes=dict(attributes),
                             message_id=message_id,
                             ordering_key=ordering_key,
-                        )
+                        ),
                     )
         return ids
 

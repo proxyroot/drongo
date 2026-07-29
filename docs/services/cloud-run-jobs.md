@@ -102,12 +102,27 @@ def test_delete_job():
         pass
 ```
 
+## Run your actual code
+
+Register a Python function for a job and drongo runs it when `run_job` is called
+(a raising handler marks the execution failed). See
+[Executable handlers](../executable-handlers.md).
+
+```python
+from drongo import cloudrun
+
+
+@cloudrun.job_handler("projects/p/locations/us-central1/jobs/nightly")
+def nightly(): ...  # real work; runs on run_job
+```
+
 ## Coverage
 
 | Operation | Status |
 | --- | --- |
 | Create / get / list / delete job | Supported |
 | `run_job` (creates an execution) | Supported |
+| Executable handler (`run_job` runs your function) | Supported |
 | Executions: get / list / delete | Supported |
 | Long-running operations (`.result()`) | Supported (completed synchronously) |
 | Actual container execution | Planned (no real compute) |

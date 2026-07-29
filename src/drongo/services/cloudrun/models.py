@@ -8,12 +8,18 @@ that the operations endpoint replays for the client's poll.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any
 
 from drongo.core import exceptions
 from drongo.core.backend import BackendDict, BaseBackend
+
+#: A job handler is a zero-argument callable standing in for the container's
+#: entrypoint. drongo invokes it when ``run_job`` is called; if it raises, the
+#: execution is recorded as failed.
+JobHandler = Callable[[], Any]
 
 _JOB_TYPE = "type.googleapis.com/google.cloud.run.v2.Job"
 _EXECUTION_TYPE = "type.googleapis.com/google.cloud.run.v2.Execution"
@@ -25,21 +31,36 @@ def _now() -> str:
 
 @dataclass
 class Execution:
-    """One run of a job."""
+    """One run of a job.
+
+    ``succeeded_count`` / ``failed_count`` reflect the outcome of the registered
+    job handler (if any). With no handler the run is reported as a successful
+    no-op, exactly as before.
+    """
 
     name: str
     job: str
     create_time: str = field(default_factory=_now)
+    task_count: int = 1
+    succeeded_count: int = 1
+    failed_count: int = 0
+    error: str | None = None
 
     def to_resource(self) -> dict[str, Any]:
+        state = "CONDITION_SUCCEEDED" if self.failed_count == 0 else "CONDITION_FAILED"
+        condition: dict[str, Any] = {"type": "Completed", "state": state}
+        if self.error:
+            condition["message"] = self.error
         return {
             "name": self.name,
             "uid": self.name.rsplit("/", 1)[-1],
             "job": self.job.rsplit("/", 1)[-1],
             "createTime": self.create_time,
             "completionTime": self.create_time,
-            "taskCount": 1,
-            "succeededCount": 1,
+            "taskCount": self.task_count,
+            "succeededCount": self.succeeded_count,
+            "failedCount": self.failed_count,
+            "conditions": [condition],
         }
 
 
@@ -72,7 +93,12 @@ class CloudRunBackend(BaseBackend):
     def setup(self) -> None:
         self.jobs: dict[str, Job] = {}
         self.operations: dict[str, dict[str, Any]] = {}
+        self.handlers: dict[str, JobHandler] = {}
         self._counter = 0
+
+    def register_handler(self, job_name: str, handler: JobHandler) -> None:
+        """Bind a Python callable to ``job_name``; ``run_job`` will invoke it."""
+        self.handlers[job_name] = handler
 
     def _next(self) -> int:
         self._counter += 1
@@ -122,6 +148,17 @@ class CloudRunBackend(BaseBackend):
         job = self.get_job(name)
         execution_name = f"{name}/executions/exec-{self._next()}"
         execution = Execution(name=execution_name, job=name)
+        handler = self.handlers.get(name)
+        if handler is not None:
+            # Actually run the user's code. A raised exception is a failed run,
+            # surfaced on the Execution (Cloud Run does not fail the operation
+            # itself), so tests can assert on failure_count / conditions.
+            try:
+                handler()
+            except Exception as exc:  # noqa: BLE001 - reported as a failed execution
+                execution.succeeded_count = 0
+                execution.failed_count = 1
+                execution.error = f"{type(exc).__name__}: {exc}"
         job.executions[execution_name] = execution
         parent = name.rsplit("/jobs/", 1)[0]
         return self._operation(parent, _EXECUTION_TYPE, execution.to_resource())

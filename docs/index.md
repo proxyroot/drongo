@@ -42,6 +42,8 @@ Cloud.
 - **In-memory and fast.** No Docker, no emulators, no sockets. Tests run in milliseconds.
 - **Default clients, unchanged.** Your code uses its normal client, with its normal
   transport. drongo handles gRPC-first services behind the scenes.
+- **Runs your code.** Opt-in [executable handlers](executable-handlers.md) actually
+  run your Python when a job runs, a task dispatches, or a message publishes.
 - **Standalone server.** `drongo server` speaks real HTTP so SDKs in *any* language can point at it.
 - **pytest-native.** A `drongo` fixture is auto-registered on install.
 - **Typed.** Ships `py.typed`, checked with mypy.
