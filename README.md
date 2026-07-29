@@ -115,7 +115,8 @@ def test_with_fixture(drongo):
 
 ### Secret Manager
 
-Construct the client with the REST transport so `drongo` can intercept it:
+Use the **normal** client; drongo forces it onto its REST transport for the
+mock scope, so no code change is needed:
 
 ```python
 from drongo import mock_gcp
@@ -125,7 +126,7 @@ from drongo import mock_gcp
 def test_secret():
     from google.cloud import secretmanager
 
-    client = secretmanager.SecretManagerServiceClient(transport="rest")
+    client = secretmanager.SecretManagerServiceClient()  # default, no transport arg
     secret = client.create_secret(
         request={
             "parent": "projects/my-project",
@@ -201,7 +202,7 @@ client.create_bucket("b")  # served by the drongo server over HTTP
 | Service | Transport | Coverage |
 | --- | --- | --- |
 | **Cloud Storage** | JSON API (default) | buckets, objects, multipart/simple/resumable uploads, downloads (incl. Range), list w/ prefix & delimiter, copy/rewrite, metadata |
-| **Secret Manager** | REST (`transport="rest"`) | secrets, versions, access, enable/disable/destroy, list |
+| **Secret Manager** | gRPC (default, forced to REST) | secrets, versions, access, enable/disable/destroy, list |
 | **Pub/Sub** | gRPC (default, via emulator) | topics, subscriptions, publish fan-out, pull/ack, nack (modifyAckDeadline), list/delete |
 | **BigQuery** | REST/JSON (default) | datasets, tables (with schema), streaming inserts (`insertAll`), read rows (`tabledata.list`), list/delete. Query *execution* not supported (needs a SQL engine) |
 | **Cloud Tasks** | gRPC (default, forced to REST) | queues + tasks CRUD, `run_task`, purge, pause/resume, list |

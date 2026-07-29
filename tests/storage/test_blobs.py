@@ -29,6 +29,18 @@ def test_upload_and_download_bytes() -> None:
     assert bucket.blob("bin").download_as_bytes() == payload
 
 
+def test_upload_json_content_type() -> None:
+    # Regression: when the uploaded data is itself JSON, the multipart parser
+    # must still find the metadata part (and thus the object name) by position.
+    bucket = _bucket()
+    bucket.blob("data.json").upload_from_string(
+        '{"id": "o1"}', content_type="application/json"
+    )
+    blob = bucket.get_blob("data.json")
+    assert blob.content_type == "application/json"
+    assert bucket.blob("data.json").download_as_text() == '{"id": "o1"}'
+
+
 def test_large_resumable_upload_roundtrips() -> None:
     bucket = _bucket()
     payload = b"z" * (9 * 1024 * 1024)  # exceeds the multipart threshold

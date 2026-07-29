@@ -1,4 +1,4 @@
-"""Secret Manager tests (REST transport)."""
+"""Secret Manager tests using the default client (drongo forces it to REST)."""
 
 from __future__ import annotations
 
@@ -13,7 +13,8 @@ PROJECT = "projects/test-project"
 def _client():
     from google.cloud import secretmanager
 
-    return secretmanager.SecretManagerServiceClient(transport="rest")
+    # No transport="rest": drongo forces the default client onto REST.
+    return secretmanager.SecretManagerServiceClient()
 
 
 def _create(client, secret_id: str = "api-key"):

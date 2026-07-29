@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Secret Manager** now works with the default client (no `transport="rest"`
+  needed): drongo forces it onto its REST transport during a mock scope.
+
+### Fixed
+
+- Storage: a `multipart/related` upload whose payload is itself JSON no longer
+  fails with "Cannot determine object name" (the parser now assigns parts by
+  position instead of by `Content-Type`).
+
 ## [0.2.0] - 2026-07-29
 
 ### Added

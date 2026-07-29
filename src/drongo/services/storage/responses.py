@@ -317,9 +317,7 @@ def _parse_multipart_related(
         return (json.loads(body.decode("utf-8")) if body else {}), b"", None
 
     marker = b"--" + boundary.encode("utf-8")
-    metadata: dict = {}
-    data = b""
-    data_content_type: str | None = None
+    parts: list[tuple[str, bytes]] = []
 
     for segment in body.split(marker):
         if segment in (b"", b"--", b"--\r\n", b"\r\n"):
@@ -339,12 +337,19 @@ def _parse_multipart_related(
                 key, _, value = line.partition(b":")
                 if key.strip().lower() == b"content-type":
                     part_type = value.strip().decode("utf-8")
+        parts.append((part_type, content))
 
-        if part_type.startswith("application/json"):
-            metadata = json.loads(content.decode("utf-8")) if content else {}
-        else:
-            data = content
-            data_content_type = part_type or None
+    # A GCS multipart/related upload is always ordered [metadata JSON, media].
+    # Assign by position: keying off Content-Type breaks when the uploaded data
+    # is itself JSON (both parts would look like the metadata part).
+    metadata: dict = {}
+    data = b""
+    data_content_type: str | None = None
+    if parts:
+        metadata = json.loads(parts[0][1].decode("utf-8")) if parts[0][1] else {}
+    if len(parts) > 1:
+        data_content_type = parts[1][0] or None
+        data = parts[1][1]
 
     return metadata, data, data_content_type
 
