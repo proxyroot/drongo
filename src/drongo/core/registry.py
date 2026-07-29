@@ -1,8 +1,8 @@
 """Registry of mocked services.
 
 Each service module builds a :class:`ServiceDefinition` (a project-keyed
-:class:`~gato.core.backend.BackendDict` plus a
-:class:`~gato.core.responses.BaseResponse`) and calls :func:`register_service`
+:class:`~drongo.core.backend.BackendDict` plus a
+:class:`~drongo.core.responses.BaseResponse`) and calls :func:`register_service`
 at import time. The controller walks the registry to wire every service's routes
 into the interception layer and to reset state between tests.
 """
@@ -11,8 +11,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from gato.core.backend import BackendDict
-from gato.core.responses import BaseResponse
+from drongo.core.backend import BackendDict
+from drongo.core.responses import BaseResponse
 
 
 @dataclass(frozen=True)
@@ -42,7 +42,7 @@ def get_backend(name: str) -> BackendDict:
 
     Mirrors ``moto.backends.get_backend``::
 
-        from gato import get_backend
+        from drongo import get_backend
         get_backend("storage")["my-project"].buckets  # -> {name: Bucket}
     """
     try:

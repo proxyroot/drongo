@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-`gato` is pre-1.0; security fixes land on the latest released version. Please
+`drongo` is pre-1.0; security fixes land on the latest released version. Please
 always test against the most recent release.
 
 | Version | Supported |
@@ -15,7 +15,7 @@ always test against the most recent release.
 Please **do not** open a public issue for security vulnerabilities.
 
 Instead, report privately via GitHub's
-[private vulnerability reporting](https://github.com/proxyroot/gato/security/advisories/new)
+[private vulnerability reporting](https://github.com/proxyroot/drongo/security/advisories/new)
 or email **security@proxyroot.com**.
 
 Include, if possible:
@@ -29,7 +29,7 @@ timeline after triage.
 
 ## Scope note
 
-`gato` is a **testing** tool that fakes cloud APIs in-process. It is not
+`drongo` is a **testing** tool that fakes cloud APIs in-process. It is not
 intended for production use and should never hold real secrets or serve
-production traffic. The standalone `gato server` binds to `localhost` by default
+production traffic. The standalone `drongo server` binds to `localhost` by default
 and performs no authentication - do not expose it to untrusted networks.

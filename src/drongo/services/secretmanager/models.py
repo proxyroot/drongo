@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from gato.core import exceptions
-from gato.core.backend import BackendDict, BaseBackend
-from gato.core.utils import now_rfc3339
+from drongo.core import exceptions
+from drongo.core.backend import BackendDict, BaseBackend
+from drongo.core.utils import now_rfc3339
 
 
 @dataclass
@@ -144,7 +144,7 @@ class SecretManagerBackend(BaseBackend):
     def access_version(self, secret_id: str, version: str) -> SecretVersion:
         secret_version = self.get_version(secret_id, version)
         if secret_version.state != "ENABLED":
-            raise exceptions.GatoHttpError(
+            raise exceptions.DrongoHttpError(
                 400,
                 f"Cannot access secret version in state {secret_version.state}.",
                 reason="failedPrecondition",

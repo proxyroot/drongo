@@ -1,13 +1,15 @@
 name: Release
 
 # Publishes to PyPI via Trusted Publishing (OIDC) when a GitHub Release is
-# published, or a v* tag is pushed. No API tokens required - configure a
-# trusted publisher for this repo at https://pypi.org/manage/account/publishing/
+# published (typically by the owner publishing the draft that Release Drafter
+# maintains). No API tokens required - configure a trusted publisher for this
+# repo at https://pypi.org/manage/account/publishing/
+#
+# Triggering only on `release: published` (not on tag pushes) avoids a
+# double publish, since publishing a release also creates its tag.
 on:
   release:
     types: [published]
-  push:
-    tags: ["v*"]
 
 permissions:
   contents: read
@@ -35,7 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/p/gato
+      url: https://pypi.org/p/drongo
     permissions:
       id-token: write # required for Trusted Publishing
     steps:

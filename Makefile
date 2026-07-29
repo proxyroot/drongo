@@ -4,7 +4,7 @@ help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
 		awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-12s\033[0m %s\n", $$1, $$2}'
 
-install: ## Create .venv, install gato[dev] editable, set up pre-commit
+install: ## Create .venv, install drongo[dev] editable, set up pre-commit
 	uv venv
 	uv pip install -e ".[dev]"
 	-uv run pre-commit install
@@ -22,7 +22,7 @@ test: ## Run the test suite
 	uv run pytest
 
 cov: ## Run tests with coverage report
-	uv run pytest --cov=gato --cov-report=term-missing
+	uv run pytest --cov=drongo --cov-report=term-missing
 
 check: ## Run all quality gates (lint + format check + type + test)
 	uv run ruff check .
@@ -31,7 +31,7 @@ check: ## Run all quality gates (lint + format check + type + test)
 	uv run pytest
 
 server: ## Run the standalone mock server
-	uv run gato server
+	uv run drongo server
 
 build: ## Build sdist + wheel
 	uv build

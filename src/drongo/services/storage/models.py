@@ -5,9 +5,9 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from urllib.parse import quote
 
-from gato.core import exceptions
-from gato.core.backend import BackendDict, BaseBackend
-from gato.core.utils import crc32c_base64, md5_base64, now_rfc3339
+from drongo.core import exceptions
+from drongo.core.backend import BackendDict, BaseBackend
+from drongo.core.utils import crc32c_base64, md5_base64, now_rfc3339
 
 #: Base endpoint used when rendering ``selfLink``/``mediaLink`` fields.
 STORAGE_ENDPOINT = "https://storage.googleapis.com"

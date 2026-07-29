@@ -21,7 +21,7 @@ def md5_base64(data: bytes) -> str:
 def crc32c_base64(data: bytes) -> str | None:
     """Base64 big-endian CRC32C, or ``None`` if ``google-crc32c`` is unavailable.
 
-    GCS reports CRC32C for every object. The pure-Python fallback keeps gato
+    GCS reports CRC32C for every object. The pure-Python fallback keeps drongo
     dependency-free; when ``google-crc32c`` (a transitive dep of the storage
     client) is importable we use it for speed and exactness.
     """

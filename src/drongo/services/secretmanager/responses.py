@@ -1,6 +1,6 @@
 """HTTP handlers implementing the Secret Manager REST (v1) API.
 
-Construct the client with the REST transport to route it through gato::
+Construct the client with the REST transport to route it through drongo::
 
     client = secretmanager.SecretManagerServiceClient(transport="rest")
 """
@@ -9,9 +9,9 @@ from __future__ import annotations
 
 import base64
 
-from gato.core import exceptions
-from gato.core.responses import BaseResponse, HttpResponse, Request, json_response
-from gato.services.secretmanager.models import (
+from drongo.core import exceptions
+from drongo.core.responses import BaseResponse, HttpResponse, Request, json_response
+from drongo.services.secretmanager.models import (
     SecretManagerBackend,
     secretmanager_backends,
 )

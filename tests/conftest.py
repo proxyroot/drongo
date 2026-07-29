@@ -7,7 +7,7 @@ import pytest
 
 @pytest.fixture
 def storage_client():
-    """A Cloud Storage client wired for the active gato mock scope."""
+    """A Cloud Storage client wired for the active drongo mock scope."""
     from google.cloud import storage
 
     return storage.Client(project="test-project")

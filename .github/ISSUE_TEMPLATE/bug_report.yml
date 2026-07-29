@@ -4,7 +4,7 @@ labels: ["bug"]
 body:
   - type: markdown
     attributes:
-      value: Thanks for helping make gato better! Please fill in as much as you can.
+      value: Thanks for helping make drongo better! Please fill in as much as you can.
   - type: input
     id: service
     attributes:
@@ -19,7 +19,7 @@ body:
       description: A small snippet using `mock_gcp` and a real google-cloud client.
       render: python
       placeholder: |
-        from gato import mock_gcp
+        from drongo import mock_gcp
 
         @mock_gcp
         def test_it():
@@ -37,6 +37,6 @@ body:
     id: versions
     attributes:
       label: Versions
-      description: Output of `pip show gato google-cloud-storage` (and Python version).
+      description: Output of `pip show drongo google-cloud-storage` (and Python version).
     validations:
       required: true

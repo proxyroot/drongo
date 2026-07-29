@@ -3,7 +3,7 @@
 This mirrors moto's ``moto.core.base_backend`` design, adapted to GCP:
 
 * moto keys backends by ``account_id`` **and** ``region``; GCP's natural shard
-  key is the **project**, so gato's :class:`BackendDict` maps ``project -> backend``.
+  key is the **project**, so drongo's :class:`BackendDict` maps ``project -> backend``.
 * Some GCP services have a *global* resource namespace (Cloud Storage buckets
   are globally unique, exactly like S3 in moto). Those pass
   ``global_namespace=True`` so every project shares one backend - the same
@@ -44,7 +44,7 @@ class BackendDict(Generic[B]):
     """Lazily maps a GCP project id to that project's backend.
 
     Access a project's backend with ``backends["my-project"]``; it is created on
-    first use. This is gato's analogue of moto's ``BackendDict``.
+    first use. This is drongo's analogue of moto's ``BackendDict``.
     """
 
     def __init__(

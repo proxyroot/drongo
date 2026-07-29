@@ -1,14 +1,14 @@
 """Google Cloud Storage mock.
 
-Registers the ``storage`` service with the gato engine on import.
+Registers the ``storage`` service with the drongo engine on import.
 """
 
 from __future__ import annotations
 
-from gato.core.registry import ServiceDefinition, register_service
-from gato.services.storage import urls
-from gato.services.storage.models import StorageBackend, storage_backends
-from gato.services.storage.responses import StorageResponse
+from drongo.core.registry import ServiceDefinition, register_service
+from drongo.services.storage import urls
+from drongo.services.storage.models import StorageBackend, storage_backends
+from drongo.services.storage.responses import StorageResponse
 
 __all__ = ["StorageBackend", "StorageResponse", "storage_backends"]
 

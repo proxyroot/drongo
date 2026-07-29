@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import json
 
-from gato.core import exceptions
-from gato.core.credentials import DEFAULT_PROJECT
-from gato.core.responses import BaseResponse, HttpResponse, Request, json_response
-from gato.services.storage.models import (
+from drongo.core import exceptions
+from drongo.core.credentials import DEFAULT_PROJECT
+from drongo.core.responses import BaseResponse, HttpResponse, Request, json_response
+from drongo.services.storage.models import (
     STORAGE_ENDPOINT,
     Blob,
     StorageBackend,
@@ -108,7 +108,7 @@ class StorageResponse(BaseResponse):
     def _start_resumable(self, request: Request, bucket: str) -> HttpResponse:
         metadata = request.json()
         name = self._require_name(metadata.get("name") or request.param("name"))
-        upload_id = f"gato-upload-{self.backend.tick()}"
+        upload_id = f"drongo-upload-{self.backend.tick()}"
         self.backend.resumable_uploads[upload_id] = {
             "bucket": bucket,
             "name": name,

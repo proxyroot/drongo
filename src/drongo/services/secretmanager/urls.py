@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from gato.services.secretmanager.responses import SecretManagerResponse
+from drongo.services.secretmanager.responses import SecretManagerResponse
 
 _SECRET = r"/v1/projects/(?P<project>[^/]+)/secrets/(?P<secret>[^/:]+)"
 _VERSION = _SECRET + r"/versions/(?P<version>[^/:]+)"

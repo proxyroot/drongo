@@ -40,4 +40,4 @@ Backend: per-project.
 
 Pub/Sub · Firestore · BigQuery · Cloud Tasks · Resource Manager. See the
 [roadmap](../README.md#roadmap) and
-[open a service request](https://github.com/proxyroot/gato/issues/new/choose).
+[open a service request](https://github.com/proxyroot/drongo/issues/new/choose).

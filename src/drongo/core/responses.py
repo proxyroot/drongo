@@ -1,4 +1,4 @@
-"""Request handling for a mocked service - gato's ``BaseResponse``.
+"""Request handling for a mocked service - drongo's ``BaseResponse``.
 
 Like moto, each service ships a ``responses.py`` with a ``BaseResponse``
 subclass (``StorageResponse``, ``SecretManagerResponse`` …) whose methods handle
@@ -8,12 +8,12 @@ individual API calls, plus a ``urls.py`` declaring ``url_bases`` and
 * **in-process** - registered with the ``responses`` interception layer so the
   google client transports are served from memory (:meth:`register` /
   :meth:`dispatch`).
-* **standalone server** - :mod:`gato.server` calls :meth:`handle` directly.
+* **standalone server** - :mod:`drongo.server` calls :meth:`handle` directly.
 
 ``url_paths`` maps ``"<METHOD> <path-regex>"`` to a handler function taking
 ``(self, request)``; the first match wins, so list specific paths first. This is
-gato's adaptation of moto's ``url_paths`` (which maps a path regex to a single
-dispatch); gato folds the HTTP method into the key so each verb gets its own
+drongo's adaptation of moto's ``url_paths`` (which maps a path regex to a single
+dispatch); drongo folds the HTTP method into the key so each verb gets its own
 handler.
 """
 
@@ -26,7 +26,7 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 from urllib.parse import parse_qs, unquote, urlparse
 
-from gato.core.exceptions import GatoHttpError
+from drongo.core.exceptions import DrongoHttpError
 
 if TYPE_CHECKING:  # pragma: no cover
     import responses as responses_lib
@@ -115,7 +115,7 @@ class BaseResponse:
             }
             try:
                 return handler(self, request)
-            except GatoHttpError as exc:
+            except DrongoHttpError as exc:
                 return exc.to_response()
         return None
 
@@ -139,9 +139,9 @@ class BaseResponse:
         response = self.handle(request)
         if response is not None:
             return response
-        return GatoHttpError(
+        return DrongoHttpError(
             404,
-            f"gato has no route for {request.method} {request.path}",
+            f"drongo has no route for {request.method} {request.path}",
             reason="notFound",
         ).to_response()
 

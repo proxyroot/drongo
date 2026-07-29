@@ -6,7 +6,7 @@ import unittest
 
 import pytest
 
-from gato import get_backend, mock_gcp
+from drongo import get_backend, mock_gcp
 
 
 def _make_bucket(name: str) -> None:
@@ -66,9 +66,9 @@ def test_reentrant_scopes_share_state() -> None:
     assert _buckets() == {}
 
 
-def test_fixture(gato) -> None:
+def test_fixture(drongo) -> None:
     _make_bucket("fx")
-    assert "fx" in gato.backend("storage").buckets
+    assert "fx" in drongo.backend("storage").buckets
 
 
 def test_get_backend_unknown_raises() -> None:

@@ -1,0 +1,53 @@
+name-template: "v$RESOLVED_VERSION"
+tag-template: "v$RESOLVED_VERSION"
+
+categories:
+  - title: "🚀 Features"
+    labels: ["feature", "enhancement", "service"]
+  - title: "🐛 Bug Fixes"
+    labels: ["bug", "fix"]
+  - title: "📝 Documentation"
+    labels: ["documentation", "docs"]
+  - title: "🧰 Maintenance"
+    labels: ["chore", "ci", "refactor", "dependencies", "test"]
+
+change-template: "- $TITLE (#$NUMBER) @$AUTHOR"
+change-title-escapes: '\<*_&'
+
+version-resolver:
+  major:
+    labels: ["major", "breaking"]
+  minor:
+    labels: ["minor", "feature", "enhancement", "service"]
+  patch:
+    labels: ["patch", "fix", "bug", "chore", "ci", "docs", "documentation", "dependencies"]
+  default: patch
+
+# Label pull requests automatically from branch names and titles so the draft
+# release notes are categorised without manual labelling.
+autolabeler:
+  - label: "documentation"
+    branch: ['/^docs\/.+/']
+    title: ['/^docs(\(.+\))?:/i']
+    files: ["docs/**/*", "**/*.md"]
+  - label: "feature"
+    branch: ['/^feat\/.+/']
+    title: ['/^feat(\(.+\))?:/i']
+  - label: "bug"
+    branch: ['/^fix\/.+/']
+    title: ['/^fix(\(.+\))?:/i']
+  - label: "chore"
+    branch: ['/^(chore|refactor)\/.+/']
+    title: ['/^(chore|refactor)(\(.+\))?:/i']
+  - label: "ci"
+    branch: ['/^ci\/.+/']
+    files: [".github/**/*"]
+
+template: |
+  ## What's changed
+
+  $CHANGES
+
+  **Full changelog**: https://github.com/proxyroot/drongo/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION
+
+no-changes-template: "No user-facing changes yet."

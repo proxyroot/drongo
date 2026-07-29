@@ -1,7 +1,7 @@
 # Adding a service
 
-Adding a GCP service to `gato` is intentionally mechanical - the same shape moto
-uses. A service lives in `src/gato/services/<name>/` and is three files plus an
+Adding a GCP service to `drongo` is intentionally mechanical - the same shape moto
+uses. A service lives in `src/drongo/services/<name>/` and is three files plus an
 `__init__.py`.
 
 We'll sketch a fictional `widgets` service. Use the existing `storage` and
@@ -10,7 +10,7 @@ We'll sketch a fictional `widgets` service. Use the existing `storage` and
 ## 1. `models.py` - in-memory state
 
 ```python
-from gato.core.backend import BaseBackend, BackendDict
+from drongo.core.backend import BaseBackend, BackendDict
 
 
 class WidgetsBackend(BaseBackend):
@@ -34,8 +34,8 @@ widgets_backends: BackendDict[WidgetsBackend] = BackendDict(WidgetsBackend, "wid
 ## 2. `responses.py` - request handlers
 
 ```python
-from gato.core.responses import BaseResponse, HttpResponse, Request, json_response
-from gato.services.widgets.models import widgets_backends
+from drongo.core.responses import BaseResponse, HttpResponse, Request, json_response
+from drongo.services.widgets.models import widgets_backends
 
 
 class WidgetsResponse(BaseResponse):
@@ -49,13 +49,13 @@ class WidgetsResponse(BaseResponse):
 
 Handlers receive a decoded `Request` (`.path_params`, `.param()`, `.header()`,
 `.json()`, `.body`) and return `(status, headers, body)` - use `json_response`
-for JSON. Raise `gato.core.exceptions.not_found(...)` etc. for errors; they're
+for JSON. Raise `drongo.core.exceptions.not_found(...)` etc. for errors; they're
 serialized into the GCP error envelope automatically.
 
 ## 3. `urls.py` - routing
 
 ```python
-from gato.services.widgets.responses import WidgetsResponse
+from drongo.services.widgets.responses import WidgetsResponse
 
 url_bases = [r"https?://widgets\.googleapis\.com"]
 
@@ -74,10 +74,10 @@ url_paths = {
 ## 4. `__init__.py` - register the service
 
 ```python
-from gato.core.registry import ServiceDefinition, register_service
-from gato.services.widgets import urls
-from gato.services.widgets.models import widgets_backends
-from gato.services.widgets.responses import WidgetsResponse
+from drongo.core.registry import ServiceDefinition, register_service
+from drongo.services.widgets import urls
+from drongo.services.widgets.models import widgets_backends
+from drongo.services.widgets.responses import WidgetsResponse
 
 register_service(
     ServiceDefinition(
@@ -88,13 +88,13 @@ register_service(
 )
 ```
 
-Finally, import your package in `src/gato/services/__init__.py` so it registers
+Finally, import your package in `src/drongo/services/__init__.py` so it registers
 on load.
 
 ## 5. Tests
 
 Add tests under `tests/<name>/` that drive the **real** google-cloud client
-through `mock_gcp` (or the `gato` fixture). Assert on client-observable behavior
+through `mock_gcp` (or the `drongo` fixture). Assert on client-observable behavior
 first, and optionally on raw backend state via
 `get_backend("widgets")["project"]`.
 

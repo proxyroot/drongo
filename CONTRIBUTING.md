@@ -1,6 +1,6 @@
-# Contributing to gato
+# Contributing to drongo
 
-Thanks for your interest in improving `gato`! Whether it's a bug fix, a new
+Thanks for your interest in improving `drongo`! Whether it's a bug fix, a new
 service, docs, or a question - you're welcome here.
 
 ## Ground rules
@@ -11,15 +11,15 @@ service, docs, or a question - you're welcome here.
 
 ## Development setup
 
-`gato` uses [`uv`](https://github.com/astral-sh/uv) for environments and
+`drongo` uses [`uv`](https://github.com/astral-sh/uv) for environments and
 [`ruff`](https://github.com/astral-sh/ruff) + [`mypy`](https://mypy-lang.org/)
 for quality gates.
 
 ```bash
-git clone https://github.com/proxyroot/gato
-cd gato
+git clone https://github.com/proxyroot/drongo
+cd drongo
 
-make install     # creates .venv, installs gato[dev], sets up pre-commit
+make install     # creates .venv, installs drongo[dev], sets up pre-commit
 make check       # ruff + ruff format --check + mypy + pytest
 ```
 
@@ -35,7 +35,7 @@ make cov         # pytest with coverage
 
 ## Branching & release strategy
 
-`gato` uses a simple **trunk-based** workflow:
+`drongo` uses a simple **trunk-based** workflow:
 
 - **`main` is always releasable** - CI (ruff + mypy + tests on Python
   3.10-3.13) must be green on every commit. Never push directly to `main`.
@@ -52,14 +52,18 @@ make cov         # pytest with coverage
 
 ### Releases (maintainers)
 
-We follow [Semantic Versioning](https://semver.org/):
+We follow [Semantic Versioning](https://semver.org/). Releases are automated:
 
-1. Update `__version__` in `src/gato/__init__.py` and move the `Unreleased`
-   section of [`CHANGELOG.md`](CHANGELOG.md) under the new version.
-2. Tag the release: `git tag vX.Y.Z && git push origin vX.Y.Z` (or publish a
-   GitHub Release).
-3. The [`release` workflow](.github/workflows/release.yml) builds the
-   distributions and publishes to PyPI via Trusted Publishing - no tokens.
+1. As PRs merge to `main`, [Release Drafter](.github/workflows/release-drafter.yml)
+   keeps a **draft** GitHub Release up to date: it categorises merged PRs (by
+   their labels, which the autolabeler applies from branch/title) and computes
+   the next version. This runs only on the owner's repository.
+2. When ready to ship, bump `__version__` in `src/drongo/__init__.py` and move the
+   `Unreleased` section of [`CHANGELOG.md`](CHANGELOG.md) under the new version.
+3. Open the drafted release in the GitHub UI and **Publish** it (an owner-only
+   action). That creates the `vX.Y.Z` tag and fires the
+   [`release` workflow](.github/workflows/release.yml), which builds the
+   distributions and publishes to PyPI via Trusted Publishing (no tokens).
 
 ## Making a change
 
@@ -76,7 +80,7 @@ you've run `make install`.
 ## Adding a new service
 
 This is the most valuable kind of contribution and is intentionally mechanical.
-A service is three files under `src/gato/services/<name>/`:
+A service is three files under `src/drongo/services/<name>/`:
 
 - `models.py` - a `BaseBackend` subclass holding in-memory state, plus a
   `BackendDict`.
@@ -89,7 +93,7 @@ references.
 
 ## Reporting bugs & requesting features
 
-Use the [issue templates](https://github.com/proxyroot/gato/issues/new/choose).
+Use the [issue templates](https://github.com/proxyroot/drongo/issues/new/choose).
 For security issues, see [SECURITY.md](SECURITY.md) - please do **not** open a
 public issue.
 

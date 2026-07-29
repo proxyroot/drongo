@@ -1,5 +1,5 @@
 name: ✨ Feature request
-description: Suggest an improvement to gato (not a whole new service).
+description: Suggest an improvement to drongo (not a whole new service).
 labels: ["enhancement"]
 body:
   - type: textarea

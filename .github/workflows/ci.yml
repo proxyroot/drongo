@@ -20,6 +20,7 @@ jobs:
         uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
+          cache-dependency-glob: "pyproject.toml"
       - name: Create environment
         run: uv venv --python 3.12
       - name: Install (dev)
@@ -44,12 +45,13 @@ jobs:
         uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
+          cache-dependency-glob: "pyproject.toml"
       - name: Create environment
         run: uv venv --python ${{ matrix.python-version }}
       - name: Install (test)
         run: uv pip install -e ".[test]"
       - name: pytest
-        run: uv run pytest --cov=gato --cov-report=term-missing --cov-report=xml
+        run: uv run pytest --cov=drongo --cov-report=term-missing --cov-report=xml
 
   build:
     name: Build distribution

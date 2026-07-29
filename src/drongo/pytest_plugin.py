@@ -1,15 +1,15 @@
-"""pytest integration for gato.
+"""pytest integration for drongo.
 
 Registered automatically via the ``pytest11`` entry point, so simply installing
-gato makes the fixtures below available.
+drongo makes the fixtures below available.
 
 Example::
 
-    def test_bucket(gato):
+    def test_bucket(drongo):
         from google.cloud import storage
 
         storage.Client(project="p").create_bucket("b")
-        assert "b" in gato.backend("storage").buckets
+        assert "b" in drongo.backend("storage").buckets
 """
 
 from __future__ import annotations
@@ -18,14 +18,14 @@ from collections.abc import Iterator
 
 import pytest
 
-from gato.core.backend import BackendDict, BaseBackend
-from gato.core.credentials import DEFAULT_PROJECT
-from gato.core.decorator import mock_gcp
-from gato.core.registry import get_backend
+from drongo.core.backend import BackendDict, BaseBackend
+from drongo.core.credentials import DEFAULT_PROJECT
+from drongo.core.decorator import mock_gcp
+from drongo.core.registry import get_backend
 
 
-class GatoFixture:
-    """Handle yielded by the :func:`gato` fixture for inspecting state."""
+class DrongoFixture:
+    """Handle yielded by the :func:`drongo` fixture for inspecting state."""
 
     def backends(self, name: str) -> BackendDict:
         """Return a service's project-keyed :class:`BackendDict`."""
@@ -37,7 +37,7 @@ class GatoFixture:
 
 
 @pytest.fixture
-def gato() -> Iterator[GatoFixture]:
-    """Activate gato for the duration of a test and expose its backends."""
+def drongo() -> Iterator[DrongoFixture]:
+    """Activate drongo for the duration of a test and expose its backends."""
     with mock_gcp():
-        yield GatoFixture()
+        yield DrongoFixture()

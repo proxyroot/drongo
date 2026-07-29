@@ -3,14 +3,14 @@ requires = ["hatchling>=1.21"]
 build-backend = "hatchling.build"
 
 [project]
-name = "gato"
+name = "drongo"
 dynamic = ["version"]
 description = "Mock Google Cloud Platform services in your tests - the moto for GCP."
 readme = "README.md"
 requires-python = ">=3.10"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
-authors = [{ name = "The gato contributors" }]
+authors = [{ name = "The drongo contributors" }]
 keywords = [
     "gcp",
     "google-cloud",
@@ -40,14 +40,14 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/proxyroot/gato"
-Documentation = "https://github.com/proxyroot/gato#readme"
-Repository = "https://github.com/proxyroot/gato"
-Issues = "https://github.com/proxyroot/gato/issues"
-Changelog = "https://github.com/proxyroot/gato/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/proxyroot/drongo"
+Documentation = "https://github.com/proxyroot/drongo#readme"
+Repository = "https://github.com/proxyroot/drongo"
+Issues = "https://github.com/proxyroot/drongo/issues"
+Changelog = "https://github.com/proxyroot/drongo/blob/main/CHANGELOG.md"
 
-# The google-cloud client libraries are *not* runtime dependencies: gato mocks
-# them, so users bring their own. They are only needed to run gato's own tests.
+# The google-cloud client libraries are *not* runtime dependencies: drongo mocks
+# them, so users bring their own. They are only needed to run drongo's own tests.
 [project.optional-dependencies]
 test = [
     "pytest>=7.4",
@@ -56,7 +56,7 @@ test = [
     "google-cloud-secret-manager>=2.16",
 ]
 dev = [
-    "gato[test]",
+    "drongo[test]",
     "ruff>=0.6",
     "mypy>=1.10",
     "pre-commit>=3.5",
@@ -64,17 +64,17 @@ dev = [
 ]
 
 [project.scripts]
-gato = "gato.cli:main"
+drongo = "drongo.cli:main"
 
-# Registers gato's pytest fixtures automatically when pytest is installed.
+# Registers drongo's pytest fixtures automatically when pytest is installed.
 [project.entry-points.pytest11]
-gato = "gato.pytest_plugin"
+drongo = "drongo.pytest_plugin"
 
 [tool.hatch.version]
-path = "src/gato/__init__.py"
+path = "src/drongo/__init__.py"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/gato"]
+packages = ["src/drongo"]
 
 [tool.hatch.build.targets.sdist]
 include = ["/src", "/tests", "/CHANGELOG.md", "/README.md", "/LICENSE"]
@@ -109,7 +109,7 @@ ignore = [
 python_version = "3.10"
 files = ["src"]
 # Strong, but not maximal: full "strict" fights the untyped google client
-# libraries gato has to poke at. These flags keep real value on gato's own code.
+# libraries drongo has to poke at. These flags keep real value on drongo's own code.
 disallow_untyped_defs = true
 disallow_incomplete_defs = true
 check_untyped_defs = true
@@ -127,7 +127,7 @@ ignore_missing_imports = true
 minversion = "7.0"
 testpaths = ["tests"]
 addopts = "-ra --strict-markers"
-# Turn gato's own warnings into errors, but tolerate the deprecation noise the
+# Turn drongo's own warnings into errors, but tolerate the deprecation noise the
 # google client libraries are known to emit.
 filterwarnings = [
     "error",
@@ -140,7 +140,7 @@ filterwarnings = [
 ]
 
 [tool.coverage.run]
-source = ["gato"]
+source = ["drongo"]
 branch = true
 
 [tool.coverage.report]
