@@ -18,6 +18,8 @@ from typing import Any
 from drongo.core import exceptions
 from drongo.core.backend import BackendDict, BaseBackend
 
+__all__ = ["Project", "ResourceManagerBackend", "resourcemanager_backends"]
+
 _PROJECT_TYPE = "type.googleapis.com/google.cloud.resourcemanager.v3.Project"
 
 #: Project numbers are system-assigned; start somewhere realistic-looking.
