@@ -12,6 +12,10 @@
   <img src="https://img.shields.io/badge/typed-yes-brightgreen.svg" alt="Typed">
 </p>
 
+<p align="center">
+  <strong><a href="https://drongo.proxyroot.com">Documentation</a></strong>
+</p>
+
 ---
 
 `drongo` lets you test code that talks to Google Cloud **without touching the
@@ -21,22 +25,6 @@ requests your google-cloud client libraries make.
 
 If you've used [`moto`](https://github.com/getmoto/moto) for AWS, `drongo` will
 feel immediately familiar - that's on purpose.
-
-> **Why "drongo"?** `boto` (the AWS SDK) is named after the boto, the Amazon
-> river dolphin, and `moto` mocks `boto`. The **drongo** is a bird famed for
-> vocal mimicry: the fork-tailed drongo copies other animals' alarm calls to
-> fool them into dropping their food. That is exactly what a mock does, so
-> `drongo` does it for Google Cloud. 🐦
-
-## Features
-
-- 🎯 **One decorator** - `@mock_gcp` patches every supported service, just like `@mock_aws`.
-- 🔌 **Flexible** - use it as a decorator, a context manager, a class decorator, or a `unittest.TestCase` mixin.
-- 🧠 **In-memory & fast** - no Docker, no emulators, no sockets; tests run in milliseconds.
-- 🌐 **Standalone server** - `drongo server` speaks real HTTP so SDKs in *any* language can point at it.
-- 🧪 **pytest-native** - a `drongo` fixture is auto-registered on install.
-- 🧩 **Extensible** - adding a service is `models.py` + `responses.py` + `urls.py`, the same shape as moto.
-- ✅ **Typed** - ships `py.typed`, checked with mypy.
 
 ## Installation
 
@@ -61,215 +49,72 @@ def test_upload_download():
     client = storage.Client(project="my-project")
     bucket = client.create_bucket("my-bucket")
 
-    bucket.blob("hello.txt").upload_from_string(
-        "hello drongo", content_type="text/plain"
-    )
+    bucket.blob("hello.txt").upload_from_string("hello drongo")
 
     assert bucket.blob("hello.txt").download_as_text() == "hello drongo"
     assert [b.name for b in client.list_blobs("my-bucket")] == ["hello.txt"]
 ```
 
-No credentials, no network, no emulator. `storage.Client()` works with or
-without arguments - `drongo` supplies anonymous credentials and a default project
-while a mock scope is active.
+No credentials, no network, no emulator. `storage.Client()` works with or without
+arguments - `drongo` supplies anonymous credentials and a default project while a
+mock scope is active. It also works as a called decorator, a context manager, a
+class decorator, or a `unittest.TestCase` mixin, and ships an auto-registered
+`drongo` pytest fixture - see the
+**[Quickstart guide](https://drongo.proxyroot.com/quickstart/)**.
 
-### Every way to invoke it (all like moto)
+## Features
 
-```python
-from drongo import mock_gcp
-
-
-# 1. Bare decorator
-@mock_gcp
-def test_a(): ...
-
-
-# 2. Called decorator
-@mock_gcp()
-def test_b(): ...
-
-
-# 3. Context manager
-def test_c():
-    with mock_gcp():
-        ...
-
-
-# 4. Class decorator (plain class or unittest.TestCase)
-@mock_gcp
-class TestSuite:
-    def test_d(self): ...
-```
-
-### pytest fixture
-
-```python
-def test_with_fixture(drongo):
-    from google.cloud import storage
-
-    storage.Client(project="p").create_bucket("b")
-
-    # Inspect raw backend state, moto-style.
-    assert "b" in drongo.backend("storage").buckets
-```
-
-### Secret Manager
-
-Use the **normal** client; drongo forces it onto its REST transport for the
-mock scope, so no code change is needed:
-
-```python
-from drongo import mock_gcp
-
-
-@mock_gcp
-def test_secret():
-    from google.cloud import secretmanager
-
-    client = secretmanager.SecretManagerServiceClient()  # default, no transport arg
-    secret = client.create_secret(
-        request={
-            "parent": "projects/my-project",
-            "secret_id": "api-key",
-            "secret": {"replication": {"automatic": {}}},
-        }
-    )
-    client.add_secret_version(
-        request={"parent": secret.name, "payload": {"data": b"s3cr3t"}}
-    )
-
-    accessed = client.access_secret_version(
-        request={"name": f"{secret.name}/versions/latest"}
-    )
-    assert accessed.payload.data == b"s3cr3t"
-```
-
-### Pub/Sub
-
-Pub/Sub is gRPC-first, so drongo runs an in-process gRPC emulator. Your code
-uses the **normal** client with its default transport, unchanged:
-
-```python
-from drongo import mock_gcp
-
-
-@mock_gcp
-def test_pubsub():
-    from google.cloud import pubsub_v1
-
-    publisher = pubsub_v1.PublisherClient()  # default gRPC, no code change
-    subscriber = pubsub_v1.SubscriberClient()
-    topic = "projects/my-project/topics/orders"
-    subscription = "projects/my-project/subscriptions/worker"
-
-    publisher.create_topic(request={"name": topic})
-    subscriber.create_subscription(request={"name": subscription, "topic": topic})
-
-    publisher.publish(topic, b'{"id": 1}', kind="order").result()
-
-    response = subscriber.pull(
-        request={"subscription": subscription, "max_messages": 10}
-    )
-    assert response.received_messages[0].message.data == b'{"id": 1}'
-    subscriber.acknowledge(
-        request={
-            "subscription": subscription,
-            "ack_ids": [response.received_messages[0].ack_id],
-        }
-    )
-```
-
-## Generating fake data (Faker)
-
-Fill the mocked services with realistic test data using
-[Faker](https://faker.readthedocs.io/) (`pip install "drongo[faker]"`):
-
-```python
-from drongo import seed
-
-seed.bigquery_rows(client, "project.dataset.table", count=100)  # typed by schema
-seed.storage_blobs(client, "bucket", count=20)
-seed.pubsub_messages(publisher, "projects/p/topics/t", count=50)
-```
-
-See the [seeding guide](docs/seeding.md) for the full reference.
-
-## Standalone server mode
-
-Run drongo as a real HTTP server - the same trick as `moto_server` - so
-non-Python SDKs, or the google libraries in emulator mode, can use it:
-
-```bash
-drongo server --port 9090
-export STORAGE_EMULATOR_HOST=http://localhost:9090
-```
-
-```python
-from google.cloud import storage
-from google.auth.credentials import AnonymousCredentials
-
-client = storage.Client(project="p", credentials=AnonymousCredentials())
-client.create_bucket("b")  # served by the drongo server over HTTP
-```
+- 🎯 **One decorator** - `@mock_gcp` patches every supported service, just like `@mock_aws`.
+- 🔌 **Flexible** - decorator, context manager, class decorator, or `unittest.TestCase` mixin.
+- 🧠 **In-memory & fast** - no Docker, no emulators, no sockets; tests run in milliseconds.
+- 🧬 **Default clients, unchanged** - drongo handles gRPC-first services behind the scenes.
+- 🌐 **Standalone server** - `drongo server` speaks real HTTP so SDKs in *any* language can point at it.
+- 🧪 **pytest-native** - a `drongo` fixture is auto-registered on install.
+- 🧩 **Extensible** - adding a service is `models.py` + `responses.py` + `urls.py`, the same shape as moto.
+- ✅ **Typed** - ships `py.typed`, checked with mypy.
 
 ## Supported services
 
-| Service | Transport | Coverage |
+| Service | Transport | Docs |
 | --- | --- | --- |
-| **Cloud Storage** | JSON API (default) | buckets, objects, multipart/simple/resumable uploads, downloads (incl. Range), list w/ prefix & delimiter, copy/rewrite, metadata |
-| **Secret Manager** | gRPC (default, forced to REST) | secrets, versions, access, enable/disable/destroy, list |
-| **Pub/Sub** | gRPC (default, via emulator) | topics, subscriptions, publish fan-out, pull/ack, nack (modifyAckDeadline), list/delete |
-| **BigQuery** | REST/JSON (default) | datasets, tables (with schema), streaming inserts (`insertAll`), read rows (`tabledata.list`), list/delete. Query *execution* not supported (needs a SQL engine) |
-| **Cloud Tasks** | gRPC (default, forced to REST) | queues + tasks CRUD, `run_task`, purge, pause/resume, list |
-| **Cloud Run Jobs** | gRPC (default, forced to REST) | jobs CRUD, `run_job` (LRO), executions get/list/delete |
+| **Cloud Storage** | JSON API (default) | [guide](https://drongo.proxyroot.com/services/storage/) |
+| **Secret Manager** | gRPC (default, forced to REST) | [guide](https://drongo.proxyroot.com/services/secret-manager/) |
+| **Pub/Sub** | gRPC (default, via emulator) | [guide](https://drongo.proxyroot.com/services/pubsub/) |
+| **BigQuery** | REST/JSON (default) | [guide](https://drongo.proxyroot.com/services/bigquery/) |
+| **Cloud Tasks** | gRPC (default, forced to REST) | [guide](https://drongo.proxyroot.com/services/cloud-tasks/) |
+| **Cloud Run Jobs** | gRPC (default, forced to REST) | [guide](https://drongo.proxyroot.com/services/cloud-run-jobs/) |
 
-More services are on the [roadmap](#roadmap). Adding one is intentionally
-mechanical - see [`docs/contributing-a-service.md`](docs/contributing-a-service.md).
+Full capability matrix: **[Supported services](https://drongo.proxyroot.com/supported-services/)**.
+You can also fill the mocks with realistic
+**[Faker data](https://drongo.proxyroot.com/seeding/)**, or run drongo as a
+**[standalone HTTP server](https://drongo.proxyroot.com/server/)** for non-Python SDKs.
 
 ## How it works
 
 `drongo` mirrors moto's architecture, adapted from AWS/botocore to GCP's
-REST+JSON APIs:
-
-- **`mock_gcp`** starts a reentrant controller that (a) activates the
-  [`responses`](https://github.com/getsentry/responses) HTTP interception layer
-  and (b) patches `google.auth.default` to return anonymous credentials.
-- HTTP/REST services ship a **`models.py`** (in-memory state), a **`responses.py`**
-  (a `BaseResponse` subclass with one method per API call), and a **`urls.py`**
-  (`url_bases` + `url_paths`) - the same trio moto uses.
-- gRPC-first services (Pub/Sub) can't be intercepted via HTTP, so drongo runs an
-  in-process **gRPC emulator** backed by the same `models.py` and redirects the
-  client with the standard `PUBSUB_EMULATOR_HOST` env var. Your code keeps its
-  default transport; nothing changes.
-- gRPC-default services that also ship a REST transport but have **no** emulator
-  env var (Cloud Tasks) are served over REST: drongo transparently forces the
-  client onto `transport="rest"` for the mock scope, so the default client still
-  works unchanged.
-- Backends are sharded through a **`BackendDict` keyed by project** (moto keys by
-  account + region). Globally-namespaced resources like buckets share one
-  backend, exactly as moto special-cases S3.
-- The **standalone server** replays the HTTP route tables over a real socket.
-
-See [`docs/architecture.md`](docs/architecture.md) for the full tour.
+REST+JSON APIs: HTTP services ship a `models.py` / `responses.py` / `urls.py`
+trio behind the [`responses`](https://github.com/getsentry/responses)
+interception layer, gRPC-first services run against an in-process emulator or a
+forced-REST transport, and state is sharded through a `BackendDict` keyed by
+project. See the
+**[Architecture tour](https://drongo.proxyroot.com/architecture/)** for the full
+picture.
 
 ## Roadmap
 
-- [x] Pub/Sub (in-process gRPC emulator)
-- [x] BigQuery (resource + data management)
-- [x] Cloud Tasks (forced REST)
-- [x] Cloud Run Jobs (forced REST, LRO)
+- [x] Cloud Storage, Secret Manager, Pub/Sub, BigQuery, Cloud Tasks, Cloud Run Jobs
+- [x] Data seeding with Faker
 - [ ] Firestore (gRPC emulator)
 - [ ] Resource Manager (projects)
-- [x] Data seeding with Faker
 
 Want one sooner? [Open an issue](https://github.com/proxyroot/drongo/issues/new/choose)
-or contribute it - see below.
+or contribute it.
 
 ## Contributing
 
 Contributions are very welcome! Adding a service is a great first PR. Start with
-[`CONTRIBUTING.md`](CONTRIBUTING.md) and
-[`docs/contributing-a-service.md`](docs/contributing-a-service.md).
+[`CONTRIBUTING.md`](CONTRIBUTING.md) and the
+[contributing-a-service guide](https://drongo.proxyroot.com/contributing-a-service/).
 
 ```bash
 git clone https://github.com/proxyroot/drongo

@@ -1,0 +1,62 @@
+site_name: drongo
+site_description: Mock Google Cloud Platform services in your tests. The moto for GCP.
+site_url: https://drongo.proxyroot.com
+repo_url: https://github.com/proxyroot/drongo
+repo_name: proxyroot/drongo
+edit_uri: edit/main/docs/
+copyright: Apache-2.0
+
+theme:
+  name: material
+  icon:
+    repo: fontawesome/brands/github
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: teal
+      accent: teal
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: teal
+      accent: teal
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  features:
+    - navigation.sections
+    - navigation.top
+    - navigation.instant
+    - content.code.copy
+    - content.action.edit
+    - search.suggest
+    - search.highlight
+
+markdown_extensions:
+  - admonition
+  - toc:
+      permalink: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+
+nav:
+  - Home: index.md
+  - Quickstart: quickstart.md
+  - Supported services: supported-services.md
+  - Services:
+      - Cloud Storage: services/storage.md
+      - Secret Manager: services/secret-manager.md
+      - Pub/Sub: services/pubsub.md
+      - BigQuery: services/bigquery.md
+      - Cloud Tasks: services/cloud-tasks.md
+      - Cloud Run Jobs: services/cloud-run-jobs.md
+  - Generating data: seeding.md
+  - Standalone server: server.md
+  - Architecture: architecture.md
+  - Contributing a service: contributing-a-service.md
