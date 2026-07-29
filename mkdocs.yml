@@ -68,4 +68,5 @@ nav:
   - Generating data: seeding.md
   - Standalone server: server.md
   - Architecture: architecture.md
+  - Roadmap: roadmap.md
   - Contributing a service: contributing-a-service.md

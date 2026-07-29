@@ -106,11 +106,14 @@ picture.
 
 ## Roadmap
 
-- [x] Cloud Storage, Secret Manager, Pub/Sub, BigQuery, Cloud Tasks, Cloud Run Jobs
-- [x] Resource Manager (projects)
-- [x] Firestore (gRPC emulator)
-- [x] Data seeding with Faker
-- [ ] Cloud Logging
+**Available (8 services):** Cloud Storage, Secret Manager, Pub/Sub, BigQuery,
+Cloud Tasks, Cloud Run Jobs, Resource Manager, Firestore - plus executable
+handlers, Faker seeding, and a standalone server.
+
+**Next up:** Cloud Logging, Cloud KMS, IAM / Service Accounts, Cloud Scheduler,
+Cloud Functions, Datastore mode. See the full, tiered
+**[roadmap](https://drongo.proxyroot.com/roadmap/)** (services + capabilities,
+and how drongo compares to moto).
 
 Want one sooner? [Open an issue](https://github.com/proxyroot/drongo/issues/new/choose)
 or contribute it.
