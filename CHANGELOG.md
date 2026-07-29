@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Resource Manager** mock (`resourcemanager_v3.ProjectsClient`, forced REST).
+  Scoped to the Projects API: create/get/list/search/delete/undelete/update, with
+  projects addressable by `project_id` or `projects/<number>`. Mutations are
+  long-running operations completed synchronously.
 - **Executable handlers**: opt-in Python callables that drongo actually runs when
   an action fires, so a test exercises the full producer -> consumer path
   in-process. `cloudrun.job_handler` runs on `run_job` (a raise marks the
