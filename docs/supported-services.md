@@ -105,6 +105,6 @@ Errors surface as REST-style exceptions (a duplicate job raises `Conflict`).
 
 ## Planned
 
-Firestore · Resource Manager · data seeding with Faker. See the
-[roadmap](../README.md#roadmap) and
+Firestore · Resource Manager. See the
+[roadmap](https://github.com/proxyroot/drongo#roadmap) and
 [open a service request](https://github.com/proxyroot/drongo/issues/new/choose).

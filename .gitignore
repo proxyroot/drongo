@@ -219,3 +219,6 @@ __marimo__/
 
 # hatch-vcs generated version file
 src/drongo/_version.py
+
+# mkdocs build output
+site/
