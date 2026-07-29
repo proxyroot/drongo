@@ -21,6 +21,7 @@ jobs:
     if: github.repository_owner == 'proxyroot'
     permissions:
       contents: write # create/update the draft release
+      pull-requests: read # release-drafter queries PRs associated with commits
     steps:
       - uses: release-drafter/release-drafter@v6
         with:
