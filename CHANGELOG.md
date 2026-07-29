@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Cloud Run Jobs** mock. gRPC-first with no emulator env var, so served over
+  REST with the client forced onto its REST transport. Covers jobs CRUD,
+  `run_job`, and executions get/list/delete. Long-running operations are
+  completed synchronously (each mutation returns a done `Operation`).
 - **Secret Manager** now works with the default client (no `transport="rest"`
   needed): drongo forces it onto its REST transport during a mock scope.
 
