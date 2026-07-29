@@ -70,8 +70,7 @@ Values are generated per BigQuery column type:
 Pin specific columns with `overrides`:
 
 ```python
-seed.bigquery_rows(client, "shop.analytics.orders", count=10,
-                   overrides={"paid": True})
+seed.bigquery_rows(client, "shop.analytics.orders", count=10, overrides={"paid": True})
 ```
 
 ### `seed.storage_blobs(client, bucket, count=10, *, prefix="file", suffix=".txt")`
