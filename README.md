@@ -203,6 +203,7 @@ client.create_bucket("b")  # served by the drongo server over HTTP
 | **Cloud Storage** | JSON API (default) | buckets, objects, multipart/simple/resumable uploads, downloads (incl. Range), list w/ prefix & delimiter, copy/rewrite, metadata |
 | **Secret Manager** | REST (`transport="rest"`) | secrets, versions, access, enable/disable/destroy, list |
 | **Pub/Sub** | gRPC (default, via emulator) | topics, subscriptions, publish fan-out, pull/ack, nack (modifyAckDeadline), list/delete |
+| **BigQuery** | REST/JSON (default) | datasets, tables (with schema), streaming inserts (`insertAll`), read rows (`tabledata.list`), list/delete. Query *execution* not supported (needs a SQL engine) |
 
 More services are on the [roadmap](#roadmap). Adding one is intentionally
 mechanical - see [`docs/contributing-a-service.md`](docs/contributing-a-service.md).
@@ -232,10 +233,11 @@ See [`docs/architecture.md`](docs/architecture.md) for the full tour.
 ## Roadmap
 
 - [x] Pub/Sub (in-process gRPC emulator)
-- [ ] Firestore (gRPC emulator)
-- [ ] BigQuery
+- [x] BigQuery (resource + data management)
 - [ ] Cloud Tasks
+- [ ] Firestore (gRPC emulator)
 - [ ] Resource Manager (projects)
+- [ ] Data seeding with Faker
 
 Want one sooner? [Open an issue](https://github.com/proxyroot/drongo/issues/new/choose)
 or contribute it - see below.

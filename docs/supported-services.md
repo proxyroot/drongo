@@ -53,8 +53,22 @@ Use the normal client with no `transport` argument.
 | Ack-deadline expiry / retention | ⬜ |
 | IAM, schemas, snapshots, seek | ⬜ |
 
+## BigQuery (`bigquery`)
+
+Client: `google-cloud-bigquery` · Transport: REST/JSON (default) · Backend:
+per-project.
+
+| Operation | Status |
+| --- | --- |
+| Create / get / list / delete dataset | ✅ |
+| Create / get / list / delete table (with schema) | ✅ |
+| Streaming inserts (`insert_rows_json` / `insertAll`) | ✅ |
+| Read rows (`list_rows` / `tabledata.list`) | ✅ |
+| SQL query execution (`client.query(...)`) | ⬜ (needs a SQL engine) |
+| Load/extract/copy jobs, routines, views | ⬜ |
+
 ## Planned
 
-Firestore · BigQuery · Cloud Tasks · Resource Manager. See the
+Cloud Tasks · Firestore · Resource Manager · data seeding with Faker. See the
 [roadmap](../README.md#roadmap) and
 [open a service request](https://github.com/proxyroot/drongo/issues/new/choose).

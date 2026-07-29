@@ -7,6 +7,6 @@ creating a subpackage here and importing it below.
 
 from __future__ import annotations
 
-from drongo.services import pubsub, secretmanager, storage
+from drongo.services import bigquery, pubsub, secretmanager, storage
 
-__all__ = ["pubsub", "secretmanager", "storage"]
+__all__ = ["bigquery", "pubsub", "secretmanager", "storage"]

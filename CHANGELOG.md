@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **BigQuery** mock (REST/JSON). Datasets, tables (with schema), streaming
+  inserts (`insertAll`), reading rows back (`tabledata.list`), and list/delete.
+  SQL query execution is out of scope (it needs a SQL engine).
 - **Pub/Sub** mock. Pub/Sub is gRPC-first, so drongo runs an in-process gRPC
   emulator (redirected via `PUBSUB_EMULATOR_HOST`) backed by the same in-memory
   model layer as the HTTP services. The normal (default-transport) client works
