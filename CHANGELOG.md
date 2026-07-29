@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Fake data generators** (`drongo.seed`, optional `drongo[faker]`): populate the
+  mocked services with realistic Faker data. `seed.bigquery_rows` (typed by
+  schema), `seed.storage_blobs`, and `seed.pubsub_messages`, with `overrides` and
+  reproducible `seed.seed(n)`.
 - **Cloud Run Jobs** mock. gRPC-first with no emulator env var, so served over
   REST with the client forced onto its REST transport. Covers jobs CRUD,
   `run_job`, and executions get/list/delete. Long-running operations are

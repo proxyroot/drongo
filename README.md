@@ -179,6 +179,21 @@ def test_pubsub():
     )
 ```
 
+## Generating fake data (Faker)
+
+Fill the mocked services with realistic test data using
+[Faker](https://faker.readthedocs.io/) (`pip install "drongo[faker]"`):
+
+```python
+from drongo import seed
+
+seed.bigquery_rows(client, "project.dataset.table", count=100)  # typed by schema
+seed.storage_blobs(client, "bucket", count=20)
+seed.pubsub_messages(publisher, "projects/p/topics/t", count=50)
+```
+
+See the [seeding guide](docs/seeding.md) for the full reference.
+
 ## Standalone server mode
 
 Run drongo as a real HTTP server - the same trick as `moto_server` - so
@@ -245,7 +260,7 @@ See [`docs/architecture.md`](docs/architecture.md) for the full tour.
 - [x] Cloud Run Jobs (forced REST, LRO)
 - [ ] Firestore (gRPC emulator)
 - [ ] Resource Manager (projects)
-- [ ] Data seeding with Faker
+- [x] Data seeding with Faker
 
 Want one sooner? [Open an issue](https://github.com/proxyroot/drongo/issues/new/choose)
 or contribute it - see below.
