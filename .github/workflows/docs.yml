@@ -1,16 +1,26 @@
 name: Docs
 
-# Publish the documentation site (drongo.proxyroot.com) when a GitHub Release is
-# published, so the live docs always match the released version. `workflow_dispatch`
-# stays available for manual redeploys (for example, a docs-only fix between
-# releases).
+# Publish versioned documentation (drongo.proxyroot.com) with mike when a GitHub
+# Release is published, so each released version keeps its own docs and the site
+# shows a version selector. mike stores every version on the `gh-pages` branch;
+# we then serve that branch's content through the existing GitHub Pages "Actions"
+# deployment (no Pages source change, no Jekyll). `workflow_dispatch` deploys a
+# chosen version manually (to preview, or to fix docs between releases).
 on:
   release:
     types: [published]
   workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to deploy (e.g. 0.3.0)"
+        required: true
+      alias:
+        description: "Alias to update (e.g. latest)"
+        required: false
+        default: latest
 
 permissions:
-  contents: read
+  contents: write # mike commits the built docs to the gh-pages branch
 
 concurrency:
   group: pages
@@ -21,13 +31,42 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history so mike can update gh-pages
       - name: Install uv
         uses: astral-sh/setup-uv@v5
-      - name: Build site
-        run: uvx --with mkdocs-material mkdocs build --strict
+      - name: Configure git for mike
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - name: Resolve version and alias
+        id: v
+        run: |
+          if [ "${{ github.event_name }}" = "release" ]; then
+            version="${{ github.event.release.tag_name }}"
+            version="${version#v}"
+            alias="latest"
+          else
+            version="${{ github.event.inputs.version }}"
+            alias="${{ github.event.inputs.alias }}"
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "alias=$alias" >> "$GITHUB_OUTPUT"
+      - name: Deploy version with mike
+        run: |
+          git fetch origin gh-pages 2>/dev/null || true
+          uvx --with mkdocs-material mike deploy --push --update-aliases \
+            "${{ steps.v.outputs.version }}" "${{ steps.v.outputs.alias }}"
+          uvx --with mkdocs-material mike set-default --push "${{ steps.v.outputs.alias }}"
+      - name: Assemble site from gh-pages
+        run: |
+          git fetch origin gh-pages
+          rm -rf public && mkdir public
+          git archive origin/gh-pages | tar -x -C public
+          echo "drongo.proxyroot.com" > public/CNAME
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: site
+          path: public
 
   deploy:
     needs: build
