@@ -24,8 +24,8 @@ namespace.
 
 ## Secret Manager (`secretmanager`)
 
-Client: `google-cloud-secret-manager` · Transport: REST (`transport="rest"`) ·
-Backend: per-project.
+Client: `google-cloud-secret-manager` · Transport: gRPC (default), forced to
+REST during a mock scope (no code change needed) · Backend: per-project.
 
 | Operation | Status |
 | --- | --- |
