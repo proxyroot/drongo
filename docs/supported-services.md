@@ -103,8 +103,29 @@ the normal clients with no `transport` argument.
 
 Errors surface as REST-style exceptions (a duplicate job raises `Conflict`).
 
+## Resource Manager (`resourcemanager`)
+
+Client: `google-cloud-resource-manager` (`resourcemanager_v3.ProjectsClient`) ·
+Transport: gRPC (default), forced to REST during a mock scope · Backend: global
+namespace. Use the normal client with no `transport` argument. Scoped to the
+Projects API.
+
+| Operation | Status |
+| --- | --- |
+| Create / get project | ✅ |
+| Get by `project_id` or `projects/<number>` | ✅ |
+| List projects (by `parent`) | ✅ |
+| Search projects | ✅ |
+| Delete / undelete project | ✅ |
+| Update project (display name, labels) | ✅ |
+| Move project, IAM policy, tags | ⬜ |
+| Folders, Organizations | ⬜ |
+
+Mutations are long-running operations completed synchronously (`.result()`
+returns immediately). A duplicate project raises `Conflict`.
+
 ## Planned
 
-Firestore · Resource Manager. See the
+Firestore · Folders/Organizations · project IAM. See the
 [roadmap](https://github.com/proxyroot/drongo#roadmap) and
 [open a service request](https://github.com/proxyroot/drongo/issues/new/choose).

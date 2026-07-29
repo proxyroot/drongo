@@ -32,7 +32,15 @@ from drongo.core.registry import get_backend, reset_all_backends
 #: Service subpackages reachable as ``drongo.<name>`` (e.g. ``drongo.cloudrun``)
 #: for their public helpers, such as the executable-handler decorators.
 _SERVICE_MODULES = frozenset(
-    {"bigquery", "cloudrun", "cloudtasks", "pubsub", "secretmanager", "storage"}
+    {
+        "bigquery",
+        "cloudrun",
+        "cloudtasks",
+        "pubsub",
+        "resourcemanager",
+        "secretmanager",
+        "storage",
+    }
 )
 
 __all__ = [

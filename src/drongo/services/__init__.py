@@ -12,6 +12,7 @@ from drongo.services import (
     cloudrun,
     cloudtasks,
     pubsub,
+    resourcemanager,
     secretmanager,
     storage,
 )
@@ -21,6 +22,7 @@ __all__ = [
     "cloudrun",
     "cloudtasks",
     "pubsub",
+    "resourcemanager",
     "secretmanager",
     "storage",
 ]

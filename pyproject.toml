@@ -60,6 +60,7 @@ test = [
     "google-cloud-bigquery>=3.11",
     "google-cloud-tasks>=2.13",
     "google-cloud-run>=0.10",
+    "google-cloud-resource-manager>=1.10",
     "faker>=20",
 ]
 dev = [

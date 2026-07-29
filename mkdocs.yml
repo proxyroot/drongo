@@ -61,6 +61,7 @@ nav:
       - BigQuery: services/bigquery.md
       - Cloud Tasks: services/cloud-tasks.md
       - Cloud Run Jobs: services/cloud-run-jobs.md
+      - Resource Manager: services/resource-manager.md
   - Executable handlers: executable-handlers.md
   - Generating data: seeding.md
   - Standalone server: server.md

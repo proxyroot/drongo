@@ -84,6 +84,7 @@ class decorator, or a `unittest.TestCase` mixin, and ships an auto-registered
 | **BigQuery** | REST/JSON (default) | [guide](https://drongo.proxyroot.com/services/bigquery/) |
 | **Cloud Tasks** | gRPC (default, forced to REST) | [guide](https://drongo.proxyroot.com/services/cloud-tasks/) |
 | **Cloud Run Jobs** | gRPC (default, forced to REST) | [guide](https://drongo.proxyroot.com/services/cloud-run-jobs/) |
+| **Resource Manager** | gRPC (default, forced to REST) | [guide](https://drongo.proxyroot.com/services/resource-manager/) |
 
 Full capability matrix: **[Supported services](https://drongo.proxyroot.com/supported-services/)**.
 You can also fill the mocks with realistic
@@ -104,9 +105,9 @@ picture.
 ## Roadmap
 
 - [x] Cloud Storage, Secret Manager, Pub/Sub, BigQuery, Cloud Tasks, Cloud Run Jobs
+- [x] Resource Manager (projects)
 - [x] Data seeding with Faker
 - [ ] Firestore (gRPC emulator)
-- [ ] Resource Manager (projects)
 
 Want one sooner? [Open an issue](https://github.com/proxyroot/drongo/issues/new/choose)
 or contribute it.
