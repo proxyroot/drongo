@@ -9,7 +9,9 @@ into the interception layer and to reset state between tests.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
+from typing import Any
 
 from drongo.core.backend import BackendDict
 from drongo.core.emulator import BaseEmulator
@@ -21,14 +23,17 @@ class ServiceDefinition:
     """Everything the engine needs to mock one GCP service.
 
     A service provides a project-keyed ``backends`` plus at least one interception
-    mechanism: an HTTP ``response`` router (for REST/JSON services) and/or an
-    ``emulator`` (an in-process server for gRPC-first services).
+    mechanism: an HTTP ``response`` router (for REST/JSON services), an
+    ``emulator`` (an in-process server for gRPC-first services), and/or
+    ``patchers`` (a callable returning ``unittest.mock`` patchers, e.g. to force a
+    gRPC-default client onto its REST transport so the HTTP layer can serve it).
     """
 
     name: str
     backends: BackendDict
     response: BaseResponse | None = None
     emulator: BaseEmulator | None = None
+    patchers: Callable[[], list[Any]] | None = None
 
 
 _SERVICES: dict[str, ServiceDefinition] = {}

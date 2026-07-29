@@ -67,8 +67,27 @@ per-project.
 | SQL query execution (`client.query(...)`) | ⬜ (needs a SQL engine) |
 | Load/extract/copy jobs, routines, views | ⬜ |
 
+## Cloud Tasks (`cloudtasks`)
+
+Client: `google-cloud-tasks` · Transport: gRPC (default), forced to REST during
+a mock scope (no emulator env var exists) · Backend: per-project. Use the normal
+client with no `transport` argument.
+
+| Operation | Status |
+| --- | --- |
+| Create / get / list / delete queue | ✅ |
+| Pause / resume / purge queue | ✅ |
+| Create / get / list / delete task | ✅ |
+| `run_task` (marks dispatched) | ✅ |
+| Actual task dispatch / delivery to targets | ⬜ (no real network I/O) |
+| Retry config, rate limits, IAM | ⬜ |
+
+Note: because the client is forced onto REST, errors surface as REST-style
+`google.api_core.exceptions` (e.g. a duplicate queue raises `Conflict`, not the
+gRPC `AlreadyExists`). `NotFound` is the same for both.
+
 ## Planned
 
-Cloud Tasks · Firestore · Resource Manager · data seeding with Faker. See the
+Cloud Run Jobs · Firestore · Resource Manager · data seeding with Faker. See the
 [roadmap](../README.md#roadmap) and
 [open a service request](https://github.com/proxyroot/drongo/issues/new/choose).

@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Cloud Tasks** mock. Cloud Tasks is gRPC-first with no emulator env var, so
+  drongo serves it over REST and transparently forces the client onto its REST
+  transport during a mock scope (a new `patchers` mechanism on the service
+  registry). Covers queues and tasks CRUD, `run_task`, purge, and pause/resume.
 - **BigQuery** mock (REST/JSON). Datasets, tables (with schema), streaming
   inserts (`insertAll`), reading rows back (`tabledata.list`), and list/delete.
   SQL query execution is out of scope (it needs a SQL engine).
