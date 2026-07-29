@@ -44,7 +44,7 @@ Homepage = "https://github.com/proxyroot/drongo"
 Documentation = "https://github.com/proxyroot/drongo#readme"
 Repository = "https://github.com/proxyroot/drongo"
 Issues = "https://github.com/proxyroot/drongo/issues"
-Changelog = "https://github.com/proxyroot/drongo/blob/main/CHANGELOG.md"
+Changelog = "https://github.com/proxyroot/drongo/releases"
 
 # The google-cloud client libraries are *not* runtime dependencies: drongo mocks
 # them, so users bring their own. They are only needed to run drongo's own tests.
@@ -61,6 +61,7 @@ test = [
     "google-cloud-tasks>=2.13",
     "google-cloud-run>=0.10",
     "google-cloud-resource-manager>=1.10",
+    "google-cloud-firestore>=2.11",
     "faker>=20",
 ]
 dev = [

@@ -124,8 +124,26 @@ Projects API.
 Mutations are long-running operations completed synchronously (`.result()`
 returns immediately). A duplicate project raises `Conflict`.
 
+## Firestore (`firestore`)
+
+Client: `google-cloud-firestore` · Transport: gRPC (default), served by an
+in-process gRPC emulator via `FIRESTORE_EMULATOR_HOST` · Backend: global
+namespace. Use the normal client with no `transport` argument.
+
+| Operation | Status |
+| --- | --- |
+| Document set / get / update / delete | ✅ |
+| `set(merge=True)`, `collection.add()` (auto id) | ✅ |
+| Typed values (str/int/float/bool/null/bytes/array/map/timestamp) | ✅ |
+| Subcollections | ✅ |
+| Queries: `where`, `order_by`, `limit`, `offset` | ✅ |
+| Composite `AND`/`OR`, `in` / `array_contains` | ✅ |
+| Transactions, batched writes | ⬜ |
+| Real-time listeners (`on_snapshot`) | ⬜ |
+| Aggregation / collection-group queries | ⬜ |
+
 ## Planned
 
-Firestore · Folders/Organizations · project IAM. See the
+Cloud Logging · Firestore transactions & listeners · Folders/Organizations. See the
 [roadmap](https://github.com/proxyroot/drongo#roadmap) and
 [open a service request](https://github.com/proxyroot/drongo/issues/new/choose).

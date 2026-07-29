@@ -14,7 +14,8 @@
 
 - [ ] Tests added/updated and passing (`make test`)
 - [ ] `make check` is green (ruff + format + mypy + pytest)
-- [ ] Docs / README / CHANGELOG updated if user-facing
+- [ ] Docs / README updated if user-facing
+- [ ] Labeled so Release Drafter categorizes it in the release notes
 - [ ] New behavior is exercised through a real google-cloud client in a test
 
 ## Notes for reviewers
