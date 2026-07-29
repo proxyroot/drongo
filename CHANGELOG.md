@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Firestore** mock (Native mode), served by an in-process gRPC emulator (via
+  `FIRESTORE_EMULATOR_HOST`), so the default client works unchanged. Documents
+  set/get/update/delete, `set(merge=True)` and `collection.add()`, typed values
+  (incl. arrays, maps, timestamps, bytes), subcollections, and queries (`where`
+  with `AND`/`OR`/`in`/`array_contains`, `order_by`, `limit`, `offset`).
 - **Resource Manager** mock (`resourcemanager_v3.ProjectsClient`, forced REST).
   Scoped to the Projects API: create/get/list/search/delete/undelete/update, with
   projects addressable by `project_id` or `projects/<number>`. Mutations are

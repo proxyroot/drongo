@@ -61,6 +61,7 @@ test = [
     "google-cloud-tasks>=2.13",
     "google-cloud-run>=0.10",
     "google-cloud-resource-manager>=1.10",
+    "google-cloud-firestore>=2.11",
     "faker>=20",
 ]
 dev = [

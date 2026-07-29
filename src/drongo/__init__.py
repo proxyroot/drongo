@@ -36,6 +36,7 @@ _SERVICE_MODULES = frozenset(
         "bigquery",
         "cloudrun",
         "cloudtasks",
+        "firestore",
         "pubsub",
         "resourcemanager",
         "secretmanager",
