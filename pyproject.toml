@@ -57,6 +57,7 @@ test = [
     "google-cloud-pubsub>=2.18",
     "google-cloud-bigquery>=3.11",
     "google-cloud-tasks>=2.13",
+    "google-cloud-run>=0.10",
 ]
 dev = [
     "drongo[test]",

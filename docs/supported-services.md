@@ -86,8 +86,25 @@ Note: because the client is forced onto REST, errors surface as REST-style
 `google.api_core.exceptions` (e.g. a duplicate queue raises `Conflict`, not the
 gRPC `AlreadyExists`). `NotFound` is the same for both.
 
+## Cloud Run Jobs (`cloudrun`)
+
+Client: `google-cloud-run` (`run_v2.JobsClient` / `ExecutionsClient`) · Transport:
+gRPC (default), forced to REST during a mock scope · Backend: per-project. Use
+the normal clients with no `transport` argument.
+
+| Operation | Status |
+| --- | --- |
+| Create / get / list / delete job | ✅ |
+| `run_job` (creates an execution) | ✅ |
+| Executions: get / list / delete | ✅ |
+| Long-running operations (`.result()`) | ✅ (completed synchronously) |
+| Actual container execution | ⬜ (no real compute) |
+| Cloud Run *services* (serving), revisions, traffic | ⬜ |
+
+Errors surface as REST-style exceptions (a duplicate job raises `Conflict`).
+
 ## Planned
 
-Cloud Run Jobs · Firestore · Resource Manager · data seeding with Faker. See the
+Firestore · Resource Manager · data seeding with Faker. See the
 [roadmap](../README.md#roadmap) and
 [open a service request](https://github.com/proxyroot/drongo/issues/new/choose).
