@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling>=1.21"]
+requires = ["hatchling>=1.21", "hatch-vcs>=0.4"]
 build-backend = "hatchling.build"
 
 [project]
@@ -73,8 +73,13 @@ drongo = "drongo.cli:main"
 [project.entry-points.pytest11]
 drongo = "drongo.pytest_plugin"
 
+# The version is derived from the latest git tag by hatch-vcs, so there is
+# nothing to bump by hand: tag `vX.Y.Z` and the build is `X.Y.Z`.
 [tool.hatch.version]
-path = "src/drongo/__init__.py"
+source = "vcs"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "src/drongo/_version.py"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/drongo"]

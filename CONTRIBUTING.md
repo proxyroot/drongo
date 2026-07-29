@@ -58,12 +58,13 @@ We follow [Semantic Versioning](https://semver.org/). Releases are automated:
    keeps a **draft** GitHub Release up to date: it categorises merged PRs (by
    their labels, which the autolabeler applies from branch/title) and computes
    the next version. This runs only on the owner's repository.
-2. When ready to ship, bump `__version__` in `src/drongo/__init__.py` and move the
-   `Unreleased` section of [`CHANGELOG.md`](CHANGELOG.md) under the new version.
+2. When ready to ship, move the `Unreleased` section of
+   [`CHANGELOG.md`](CHANGELOG.md) under the new version. There is **no version to
+   bump**: `hatch-vcs` derives the package version from the git tag.
 3. Open the drafted release in the GitHub UI and **Publish** it (an owner-only
    action). That creates the `vX.Y.Z` tag and fires the
-   [`release` workflow](.github/workflows/release.yml), which builds the
-   distributions and publishes to PyPI via Trusted Publishing (no tokens).
+   [`release` workflow](.github/workflows/release.yml), which builds `X.Y.Z` and
+   publishes to PyPI via Trusted Publishing (no tokens).
 
 ## Making a change
 
