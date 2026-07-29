@@ -206,6 +206,7 @@ client.create_bucket("b")  # served by the drongo server over HTTP
 | **Pub/Sub** | gRPC (default, via emulator) | topics, subscriptions, publish fan-out, pull/ack, nack (modifyAckDeadline), list/delete |
 | **BigQuery** | REST/JSON (default) | datasets, tables (with schema), streaming inserts (`insertAll`), read rows (`tabledata.list`), list/delete. Query *execution* not supported (needs a SQL engine) |
 | **Cloud Tasks** | gRPC (default, forced to REST) | queues + tasks CRUD, `run_task`, purge, pause/resume, list |
+| **Cloud Run Jobs** | gRPC (default, forced to REST) | jobs CRUD, `run_job` (LRO), executions get/list/delete |
 
 More services are on the [roadmap](#roadmap). Adding one is intentionally
 mechanical - see [`docs/contributing-a-service.md`](docs/contributing-a-service.md).
@@ -241,7 +242,7 @@ See [`docs/architecture.md`](docs/architecture.md) for the full tour.
 - [x] Pub/Sub (in-process gRPC emulator)
 - [x] BigQuery (resource + data management)
 - [x] Cloud Tasks (forced REST)
-- [ ] Cloud Run Jobs
+- [x] Cloud Run Jobs (forced REST, LRO)
 - [ ] Firestore (gRPC emulator)
 - [ ] Resource Manager (projects)
 - [ ] Data seeding with Faker
