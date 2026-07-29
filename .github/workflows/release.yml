@@ -1,0 +1,47 @@
+name: Release
+
+# Publishes to PyPI via Trusted Publishing (OIDC) when a GitHub Release is
+# published, or a v* tag is pushed. No API tokens required - configure a
+# trusted publisher for this repo at https://pypi.org/manage/account/publishing/
+on:
+  release:
+    types: [published]
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build distribution
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+      - name: Build sdist + wheel
+        run: uv build
+      - name: Check metadata
+        run: uvx twine check dist/*
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  publish:
+    name: Publish to PyPI
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/gato
+    permissions:
+      id-token: write # required for Trusted Publishing
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - name: Publish
+        uses: pypa/gh-action-pypi-publish@release/v1

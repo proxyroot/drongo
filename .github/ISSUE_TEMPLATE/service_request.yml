@@ -1,0 +1,31 @@
+name: 🧩 New service request
+description: Request (or volunteer to add) support for a new GCP service.
+labels: ["service", "enhancement"]
+body:
+  - type: input
+    id: service
+    attributes:
+      label: GCP service
+      placeholder: e.g. Pub/Sub, Firestore, BigQuery
+    validations:
+      required: true
+  - type: input
+    id: client
+    attributes:
+      label: Client library
+      placeholder: e.g. google-cloud-pubsub
+    validations:
+      required: true
+  - type: textarea
+    id: operations
+    attributes:
+      label: Operations you need
+      description: Which API calls matter most for your tests?
+    validations:
+      required: true
+  - type: checkboxes
+    id: contribute
+    attributes:
+      label: Contribution
+      options:
+        - label: I'm willing to help implement this (see docs/contributing-a-service.md)
