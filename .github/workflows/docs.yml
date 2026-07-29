@@ -1,12 +1,12 @@
 name: Docs
 
+# Publish the documentation site (drongo.proxyroot.com) when a GitHub Release is
+# published, so the live docs always match the released version. `workflow_dispatch`
+# stays available for manual redeploys (for example, a docs-only fix between
+# releases).
 on:
-  push:
-    branches: [main]
-    paths:
-      - "docs/**"
-      - "mkdocs.yml"
-      - ".github/workflows/docs.yml"
+  release:
+    types: [published]
   workflow_dispatch:
 
 permissions:
