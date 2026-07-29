@@ -49,6 +49,8 @@ Changelog = "https://github.com/proxyroot/drongo/blob/main/CHANGELOG.md"
 # The google-cloud client libraries are *not* runtime dependencies: drongo mocks
 # them, so users bring their own. They are only needed to run drongo's own tests.
 [project.optional-dependencies]
+# Optional: fake-data generators in `drongo.seed`.
+faker = ["faker>=20"]
 test = [
     "pytest>=7.4",
     "pytest-cov>=4.1",
@@ -58,6 +60,7 @@ test = [
     "google-cloud-bigquery>=3.11",
     "google-cloud-tasks>=2.13",
     "google-cloud-run>=0.10",
+    "faker>=20",
 ]
 dev = [
     "drongo[test]",
@@ -129,7 +132,7 @@ warn_unreachable = true
 pretty = true
 
 [[tool.mypy.overrides]]
-module = ["responses.*", "google.*", "google_crc32c.*", "grpc", "grpc.*"]
+module = ["responses.*", "google.*", "google_crc32c.*", "grpc", "grpc.*", "faker", "faker.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
