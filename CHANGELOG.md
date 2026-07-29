@@ -7,8 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-07-29
+
 ### Added
 
+- Versioning is now derived from the git tag via `hatch-vcs` (tag `vX.Y.Z` builds
+  `X.Y.Z`); no manual version bumps.
 - **Cloud Tasks** mock. Cloud Tasks is gRPC-first with no emulator env var, so
   drongo serves it over REST and transparently forces the client onto its REST
   transport during a mock scope (a new `patchers` mechanism on the service
@@ -48,5 +52,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Project-keyed `BackendDict` and `get_backend()` for inspecting state, mirroring
   moto's internals.
 
-[Unreleased]: https://github.com/proxyroot/drongo/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/proxyroot/drongo/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/proxyroot/drongo/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/proxyroot/drongo/releases/tag/v0.1.0

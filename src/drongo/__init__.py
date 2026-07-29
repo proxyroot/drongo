@@ -34,6 +34,10 @@ __all__ = [
     "reset_all_backends",
 ]
 
-# Single source of truth for the package version (read by Hatchling at build
-# time - see ``[tool.hatch.version]`` in pyproject.toml).
-__version__ = "0.1.0"
+# The version is derived from the git tag at build time by hatch-vcs, which
+# writes ``_version.py``. The fallback keeps imports working in a source tree
+# that has not been built yet.
+try:
+    from drongo._version import __version__
+except ImportError:  # pragma: no cover
+    __version__ = "0.0.0+unknown"

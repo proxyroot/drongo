@@ -216,3 +216,6 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# hatch-vcs generated version file
+src/drongo/_version.py
