@@ -84,6 +84,10 @@ def _patch_local_grpc(client_cls: Any, emulator: Any) -> Any:
 
             transport_cls = client_cls.get_transport_class("grpc")
             kwargs["transport"] = transport_cls(channel=grpc.insecure_channel(address))
+            # GAPIC rejects a transport instance alongside credentials/endpoint,
+            # which higher-level clients (e.g. logging.Client) pass through.
+            kwargs.pop("credentials", None)
+            kwargs.pop("client_options", None)
         original_init(self, *args, **kwargs)
 
     return mock.patch.object(client_cls, "__init__", patched_init)
