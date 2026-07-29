@@ -58,10 +58,10 @@ We follow [Semantic Versioning](https://semver.org/). Releases are automated:
    keeps a **draft** GitHub Release up to date: it categorises merged PRs (by
    their labels, which the autolabeler applies from branch/title) and computes
    the next version. This runs only on the owner's repository.
-2. When ready to ship, move the `Unreleased` section of
-   [`CHANGELOG.md`](CHANGELOG.md) under the new version. There is **no version to
-   bump**: `hatch-vcs` derives the package version from the git tag.
-3. Open the drafted release in the GitHub UI and **Publish** it (an owner-only
+   The release notes are the changelog; there is no `CHANGELOG.md` to maintain
+   by hand, and **no version to bump** (`hatch-vcs` derives the package version
+   from the git tag).
+2. Open the drafted release in the GitHub UI and **Publish** it (an owner-only
    action). That creates the `vX.Y.Z` tag and fires the
    [`release` workflow](.github/workflows/release.yml), which builds `X.Y.Z` and
    publishes to PyPI via Trusted Publishing (no tokens).

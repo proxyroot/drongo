@@ -154,6 +154,31 @@ def test_where_in_operator() -> None:
     assert got == [1, 3]
 
 
+def test_where_is_null_and_is_nan() -> None:
+    from google.cloud import firestore
+
+    client = _client()
+    client.collection("m").document("a").set({"x": 1})
+    client.collection("m").document("b").set({"x": None})
+    client.collection("m").document("c").set({"x": float("nan")})
+
+    nulls = [
+        d.id
+        for d in client.collection("m")
+        .where(filter=firestore.FieldFilter("x", "==", None))
+        .stream()
+    ]
+    assert nulls == ["b"]
+
+    nans = [
+        d.id
+        for d in client.collection("m")
+        .where(filter=firestore.FieldFilter("x", "==", float("nan")))
+        .stream()
+    ]
+    assert nans == ["c"]
+
+
 # -- subcollections / listing / inspection ----------------------------------
 
 

@@ -17,6 +17,7 @@ absent, :meth:`start` no-ops so drongo still works for other services.
 
 from __future__ import annotations
 
+import math
 import os
 from collections.abc import Callable, Iterator
 from datetime import datetime, timezone
@@ -108,7 +109,8 @@ class FirestoreEmulator(BaseEmulator):
                 try:
                     return fn(request, context)
                 except DrongoHttpError as exc:
-                    context.abort(
+                    # context.abort raises, but return it so both paths are explicit.
+                    return context.abort(
                         status.get(exc.status_code, grpc.StatusCode.UNKNOWN),
                         exc.message,
                     )
@@ -386,9 +388,11 @@ class FirestoreEmulator(BaseEmulator):
         if unary.op == op_enum.IS_NOT_NULL:
             return value is not None and value is not _MISSING
         if unary.op == op_enum.IS_NAN:
-            return isinstance(value, float) and value != value
+            return isinstance(value, float) and math.isnan(value)
         if unary.op == op_enum.IS_NOT_NAN:
-            return isinstance(value, (int, float)) and value == value
+            return isinstance(value, (int, float)) and not (
+                isinstance(value, float) and math.isnan(value)
+            )
         return True
 
     @staticmethod
