@@ -68,7 +68,12 @@ class DrongoController:
         mock.start()
         self._responses = mock
 
+        # Credential patchers, plus any service-provided patchers (e.g. forcing
+        # a gRPC-default client onto its REST transport).
         self._patchers = build_patchers()
+        for service in registry.iter_services():
+            if service.patchers is not None:
+                self._patchers.extend(service.patchers())
         for patcher in self._patchers:
             patcher.start()
 

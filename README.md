@@ -204,6 +204,7 @@ client.create_bucket("b")  # served by the drongo server over HTTP
 | **Secret Manager** | REST (`transport="rest"`) | secrets, versions, access, enable/disable/destroy, list |
 | **Pub/Sub** | gRPC (default, via emulator) | topics, subscriptions, publish fan-out, pull/ack, nack (modifyAckDeadline), list/delete |
 | **BigQuery** | REST/JSON (default) | datasets, tables (with schema), streaming inserts (`insertAll`), read rows (`tabledata.list`), list/delete. Query *execution* not supported (needs a SQL engine) |
+| **Cloud Tasks** | gRPC (default, forced to REST) | queues + tasks CRUD, `run_task`, purge, pause/resume, list |
 
 More services are on the [roadmap](#roadmap). Adding one is intentionally
 mechanical - see [`docs/contributing-a-service.md`](docs/contributing-a-service.md).
@@ -223,6 +224,10 @@ REST+JSON APIs:
   in-process **gRPC emulator** backed by the same `models.py` and redirects the
   client with the standard `PUBSUB_EMULATOR_HOST` env var. Your code keeps its
   default transport; nothing changes.
+- gRPC-default services that also ship a REST transport but have **no** emulator
+  env var (Cloud Tasks) are served over REST: drongo transparently forces the
+  client onto `transport="rest"` for the mock scope, so the default client still
+  works unchanged.
 - Backends are sharded through a **`BackendDict` keyed by project** (moto keys by
   account + region). Globally-namespaced resources like buckets share one
   backend, exactly as moto special-cases S3.
@@ -234,7 +239,8 @@ See [`docs/architecture.md`](docs/architecture.md) for the full tour.
 
 - [x] Pub/Sub (in-process gRPC emulator)
 - [x] BigQuery (resource + data management)
-- [ ] Cloud Tasks
+- [x] Cloud Tasks (forced REST)
+- [ ] Cloud Run Jobs
 - [ ] Firestore (gRPC emulator)
 - [ ] Resource Manager (projects)
 - [ ] Data seeding with Faker
