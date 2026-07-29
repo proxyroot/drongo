@@ -48,3 +48,42 @@ def _patch_transport(client_cls: Any, anonymous: Any) -> Any:
         original_init(self, *args, **kwargs)
 
     return mock.patch.object(client_cls, "__init__", patched_init)
+
+
+def force_local_grpc_patchers(
+    emulator: Any, client_specs: list[tuple[str, str]]
+) -> list[Any]:
+    """Point gRPC-only clients at an in-process emulator with no env-var seam.
+
+    Some services default to gRPC, ship **no** REST transport, and have **no**
+    emulator environment variable (IAM). They cannot be forced to REST nor
+    redirected via an env var, so drongo runs an in-process gRPC server
+    (``emulator``) and injects a transport built on an insecure channel to it.
+
+    The patch wraps each client's ``__init__`` and resolves ``emulator.address``
+    lazily at construction time (after the emulator has started), so a client
+    created with no explicit transport during a mock scope talks to drongo.
+    """
+    patchers: list[Any] = []
+    for module_path, class_name in client_specs:
+        try:
+            client_cls = getattr(importlib.import_module(module_path), class_name)
+        except (ImportError, AttributeError):
+            continue  # client library not installed: nothing to patch
+        patchers.append(_patch_local_grpc(client_cls, emulator))
+    return patchers
+
+
+def _patch_local_grpc(client_cls: Any, emulator: Any) -> Any:
+    original_init = client_cls.__init__
+
+    def patched_init(self: Any, *args: Any, **kwargs: Any) -> None:
+        address = getattr(emulator, "address", None)
+        if kwargs.get("transport") is None and address:
+            import grpc
+
+            transport_cls = client_cls.get_transport_class("grpc")
+            kwargs["transport"] = transport_cls(channel=grpc.insecure_channel(address))
+        original_init(self, *args, **kwargs)
+
+    return mock.patch.object(client_cls, "__init__", patched_init)
