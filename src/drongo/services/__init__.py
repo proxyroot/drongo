@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from drongo.services import (
     bigquery,
+    cloudfunctions,
     cloudrun,
     cloudscheduler,
     cloudtasks,
@@ -24,6 +25,7 @@ from drongo.services import (
 
 __all__ = [
     "bigquery",
+    "cloudfunctions",
     "cloudrun",
     "cloudscheduler",
     "cloudtasks",

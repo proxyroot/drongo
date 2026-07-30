@@ -34,6 +34,7 @@ from drongo.core.registry import get_backend, reset_all_backends
 _SERVICE_MODULES = frozenset(
     {
         "bigquery",
+        "cloudfunctions",
         "cloudrun",
         "cloudscheduler",
         "cloudtasks",
