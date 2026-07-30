@@ -38,6 +38,7 @@ _SERVICE_MODULES = frozenset(
         "cloudtasks",
         "firestore",
         "iam",
+        "logging",
         "pubsub",
         "resourcemanager",
         "secretmanager",

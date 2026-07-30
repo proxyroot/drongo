@@ -159,9 +159,24 @@ client with no `transport` argument.
 | Roles, IAM policy get/set | ⬜ |
 | `SignBlob` / `SignJwt` | ⬜ |
 
+## Cloud Logging (`logging`)
+
+Client: `google-cloud-logging` (`logging.Client`) · Transport: gRPC only, served
+by an in-process gRPC emulator with an injected transport · Backend: global
+namespace. Use the normal client with no `transport` argument.
+
+| Operation | Status |
+| --- | --- |
+| Write entries (`log_text` / `log_struct` / `log_proto`) | ✅ |
+| List entries (by `resource_names`) | ✅ |
+| Ordering (ascending / descending) | ✅ |
+| Delete a log; list logs | ✅ |
+| Advanced filter language | ⬜ (entries returned unfiltered) |
+| Sinks / exports, log-based metrics, tail | ⬜ |
+
 ## Planned
 
-Cloud Logging · Cloud KMS · Firestore transactions & listeners · IAM roles &
-policies · Folders/Organizations. See the
+Cloud KMS · Cloud Scheduler · Firestore transactions & listeners · IAM roles &
+policies · Cloud Logging filters & sinks. See the
 [roadmap](https://drongo.proxyroot.com/roadmap/) and
 [open a service request](https://github.com/proxyroot/drongo/issues/new/choose).
