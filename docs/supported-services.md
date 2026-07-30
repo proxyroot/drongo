@@ -174,9 +174,24 @@ namespace. Use the normal client with no `transport` argument.
 | Advanced filter language | ⬜ (entries returned unfiltered) |
 | Sinks / exports, log-based metrics, tail | ⬜ |
 
+## Cloud KMS (`kms`)
+
+Client: `google-cloud-kms` (`kms.KeyManagementServiceClient`) · Transport: gRPC
+(default), forced to REST during a mock scope · Backend: per-project. Use the
+normal client with no `transport` argument.
+
+| Operation | Status |
+| --- | --- |
+| Create / get / list key ring | ✅ |
+| Create / get / list crypto key | ✅ |
+| Encrypt / decrypt (with AAD) | ✅ (reversible mock, not real crypto) |
+| Crypto-key versions, rotation | ⬜ |
+| Asymmetric sign/verify, MAC, raw encrypt | ⬜ |
+| IAM policy, import jobs | ⬜ |
+
 ## Planned
 
-Cloud KMS · Cloud Scheduler · Firestore transactions & listeners · IAM roles &
-policies · Cloud Logging filters & sinks. See the
+Cloud Scheduler · Cloud Functions · Firestore transactions & listeners · IAM
+roles & policies · KMS key versions. See the
 [roadmap](https://drongo.proxyroot.com/roadmap/) and
 [open a service request](https://github.com/proxyroot/drongo/issues/new/choose).
