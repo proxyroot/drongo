@@ -202,9 +202,23 @@ per-project. Use the normal client with no `transport` argument.
 | `run_job` (+ executable handler) | ✅ |
 | Actual cron scheduling / automatic firing | ⬜ (no real clock) |
 
+## Cloud Functions (`cloudfunctions`)
+
+Client: `google-cloud-functions` (`functions_v2.FunctionServiceClient`) ·
+Transport: gRPC (default), forced to REST during a mock scope · Backend:
+per-project. Use the normal client with no `transport` argument. Scoped to the
+2nd-gen admin API.
+
+| Operation | Status |
+| --- | --- |
+| Create / get / list / delete function (LRO) | ✅ |
+| Update function (LRO) | ✅ |
+| `generate_upload_url` | ✅ (stub) |
+| Synchronous invoke | ⬜ (2nd gen has no invoke RPC) |
+
 ## Planned
 
-Cloud Functions · Firestore transactions & listeners · IAM roles & policies ·
-KMS key versions · Cloud Scheduler retry config. See the
+Datastore mode · Firestore transactions & listeners · IAM roles & policies · KMS
+key versions · 1st-gen Functions invoke. See the
 [roadmap](https://drongo.proxyroot.com/roadmap/) and
 [open a service request](https://github.com/proxyroot/drongo/issues/new/choose).

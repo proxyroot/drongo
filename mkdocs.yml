@@ -67,6 +67,7 @@ nav:
       - Cloud Logging: services/cloud-logging.md
       - Cloud KMS: services/cloud-kms.md
       - Cloud Scheduler: services/cloud-scheduler.md
+      - Cloud Functions: services/cloud-functions.md
   - Executable handlers: executable-handlers.md
   - Generating data: seeding.md
   - Standalone server: server.md
