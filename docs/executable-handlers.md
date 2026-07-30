@@ -26,6 +26,7 @@ when the `mock_gcp` scope resets between tests.
 | Cloud Run Jobs | `cloudrun.job_handler(job)` | `run_job` | nothing (zero-arg) |
 | Cloud Tasks | `cloudtasks.task_handler(queue)` | `run_task`; `create_task` on a running queue | a `TaskRequest` |
 | Pub/Sub | `pubsub.subscription_handler(sub)` | `publish` fans out to the subscription | a `PushMessage` |
+| Cloud Scheduler | `cloudscheduler.job_handler(job)` | `run_job` | a `SchedulerRequest` |
 
 ## Cloud Run Jobs
 
