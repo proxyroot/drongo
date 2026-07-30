@@ -64,6 +64,7 @@ test = [
     "google-cloud-firestore>=2.11",
     "google-cloud-iam>=2.12",
     "google-cloud-logging>=3.5",
+    "google-cloud-kms>=2.19",
     "faker>=20",
 ]
 dev = [
