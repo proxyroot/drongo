@@ -68,6 +68,7 @@ nav:
       - Cloud KMS: services/cloud-kms.md
       - Cloud Scheduler: services/cloud-scheduler.md
       - Cloud Functions: services/cloud-functions.md
+      - Memorystore (Redis): services/memorystore.md
   - Executable handlers: executable-handlers.md
   - Generating data: seeding.md
   - Standalone server: server.md

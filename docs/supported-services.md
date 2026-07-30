@@ -216,9 +216,22 @@ per-project. Use the normal client with no `transport` argument. Scoped to the
 | `generate_upload_url` | ✅ (stub) |
 | Synchronous invoke | ⬜ (2nd gen has no invoke RPC) |
 
+## Memorystore for Redis (`memorystore`)
+
+Client: `google-cloud-redis` (`redis_v1.CloudRedisClient`) · Transport: gRPC
+(default), forced to REST during a mock scope · Backend: per-project. Use the
+normal client with no `transport` argument. Scoped to instance administration.
+
+| Operation | Status |
+| --- | --- |
+| Create / get / list / delete instance (LRO) | ✅ |
+| Update instance (LRO) | ✅ |
+| Failover / export / import / upgrade | ⬜ |
+| Redis data plane | ⬜ (use a real Redis) |
+
 ## Planned
 
-Datastore mode · Firestore transactions & listeners · IAM roles & policies · KMS
-key versions · 1st-gen Functions invoke. See the
+Datastore mode · Cloud Spanner · Firestore transactions & listeners · IAM roles
+& policies · KMS key versions. See the
 [roadmap](https://drongo.proxyroot.com/roadmap/) and
 [open a service request](https://github.com/proxyroot/drongo/issues/new/choose).

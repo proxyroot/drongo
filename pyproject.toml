@@ -67,6 +67,7 @@ test = [
     "google-cloud-kms>=2.19",
     "google-cloud-scheduler>=2.11",
     "google-cloud-functions>=1.13",
+    "google-cloud-redis>=2.13",
     "faker>=20",
 ]
 dev = [
