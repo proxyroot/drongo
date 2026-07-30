@@ -86,6 +86,7 @@ class decorator, or a `unittest.TestCase` mixin, and ships an auto-registered
 | **Cloud Run Jobs** | gRPC (default, forced to REST) | [guide](https://drongo.proxyroot.com/services/cloud-run-jobs/) |
 | **Resource Manager** | gRPC (default, forced to REST) | [guide](https://drongo.proxyroot.com/services/resource-manager/) |
 | **Firestore** | gRPC (default, via emulator) | [guide](https://drongo.proxyroot.com/services/firestore/) |
+| **Datastore** | gRPC (default, via emulator) | [guide](https://drongo.proxyroot.com/services/datastore/) |
 | **IAM & Service Accounts** | gRPC only (via injected transport) | [guide](https://drongo.proxyroot.com/services/iam/) |
 | **Cloud Logging** | gRPC only (via injected transport) | [guide](https://drongo.proxyroot.com/services/cloud-logging/) |
 | **Cloud KMS** | gRPC (default, forced to REST) | [guide](https://drongo.proxyroot.com/services/cloud-kms/) |

@@ -38,6 +38,7 @@ _SERVICE_MODULES = frozenset(
         "cloudrun",
         "cloudscheduler",
         "cloudtasks",
+        "datastore",
         "firestore",
         "iam",
         "kms",

@@ -63,6 +63,7 @@ nav:
       - Cloud Run Jobs: services/cloud-run-jobs.md
       - Resource Manager: services/resource-manager.md
       - Firestore: services/firestore.md
+      - Datastore: services/datastore.md
       - IAM & Service Accounts: services/iam.md
       - Cloud Logging: services/cloud-logging.md
       - Cloud KMS: services/cloud-kms.md

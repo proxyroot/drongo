@@ -18,6 +18,13 @@ Legend: ✅ available · 🚧 partial · ⬜ planned
 | Cloud Run Jobs | forced REST (LRO) | jobs, executions, `run_job` handlers |
 | Resource Manager | forced REST (LRO) | projects CRUD, search, undelete |
 | Firestore | in-process gRPC emulator | documents, subcollections, typed values, queries |
+| Datastore | in-process gRPC emulator | entities, keys, typed values, filtered/ordered queries |
+| IAM & Service Accounts | injected gRPC transport | service accounts + keys |
+| Cloud Logging | injected gRPC transport | write/list log entries, delete/list logs |
+| Cloud KMS | forced REST | key rings, crypto keys, encrypt/decrypt |
+| Cloud Scheduler | forced REST | cron jobs, pause/resume, `run_job` handlers |
+| Cloud Functions | forced REST (LRO) | 2nd-gen deploy/manage functions |
+| Memorystore (Redis) | forced REST (LRO) | instance admin |
 
 ## Available capabilities
 
@@ -30,16 +37,14 @@ Legend: ✅ available · 🚧 partial · ⬜ planned
 
 ## Planned services
 
-### Tier 1 — next up (high test-demand, feasible)
+### Tier 1 — shipped
+
+Tier 1 is done: Cloud Logging, Cloud KMS, IAM & Service Accounts, Cloud
+Scheduler, Cloud Functions, Datastore, and Memorystore are all available (see the
+table above). The one item still open is:
 
 | Service | Client | Notes |
 | --- | --- | --- |
-| Cloud Logging | `google-cloud-logging` | write/list log entries; common in almost every app |
-| Cloud KMS | `google-cloud-kms` | key rings/keys, encrypt/decrypt/sign (forced REST) |
-| IAM & Service Accounts | `google-cloud-iam` | service accounts + keys; complements Resource Manager |
-| Cloud Scheduler | `google-cloud-scheduler` | cron jobs; pairs with executable handlers |
-| Cloud Functions | `google-cloud-functions` | functions CRUD + `call` (executable handler, LRO) |
-| Datastore mode | `google-cloud-datastore` | reuse the Firestore document store |
 | Storage depth | `google-cloud-storage` | signed URLs, IAM, notifications, HMAC keys |
 
 ### Tier 2 — databases & infrastructure
