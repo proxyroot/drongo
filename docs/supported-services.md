@@ -189,9 +189,22 @@ normal client with no `transport` argument.
 | Asymmetric sign/verify, MAC, raw encrypt | ⬜ |
 | IAM policy, import jobs | ⬜ |
 
+## Cloud Scheduler (`cloudscheduler`)
+
+Client: `google-cloud-scheduler` (`scheduler_v1.CloudSchedulerClient`) ·
+Transport: gRPC (default), forced to REST during a mock scope · Backend:
+per-project. Use the normal client with no `transport` argument.
+
+| Operation | Status |
+| --- | --- |
+| Create / get / list / delete job | ✅ |
+| Pause / resume / update | ✅ |
+| `run_job` (+ executable handler) | ✅ |
+| Actual cron scheduling / automatic firing | ⬜ (no real clock) |
+
 ## Planned
 
-Cloud Scheduler · Cloud Functions · Firestore transactions & listeners · IAM
-roles & policies · KMS key versions. See the
+Cloud Functions · Firestore transactions & listeners · IAM roles & policies ·
+KMS key versions · Cloud Scheduler retry config. See the
 [roadmap](https://drongo.proxyroot.com/roadmap/) and
 [open a service request](https://github.com/proxyroot/drongo/issues/new/choose).

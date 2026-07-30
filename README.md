@@ -89,6 +89,7 @@ class decorator, or a `unittest.TestCase` mixin, and ships an auto-registered
 | **IAM & Service Accounts** | gRPC only (via injected transport) | [guide](https://drongo.proxyroot.com/services/iam/) |
 | **Cloud Logging** | gRPC only (via injected transport) | [guide](https://drongo.proxyroot.com/services/cloud-logging/) |
 | **Cloud KMS** | gRPC (default, forced to REST) | [guide](https://drongo.proxyroot.com/services/cloud-kms/) |
+| **Cloud Scheduler** | gRPC (default, forced to REST) | [guide](https://drongo.proxyroot.com/services/cloud-scheduler/) |
 
 Full capability matrix: **[Supported services](https://drongo.proxyroot.com/supported-services/)**.
 You can also fill the mocks with realistic
