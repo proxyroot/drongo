@@ -1,8 +1,10 @@
 """Google Cloud Pub/Sub mock.
 
-Registers the ``pubsub`` service with the drongo engine on import. Pub/Sub is
-gRPC-first, so it is served by an in-process gRPC :class:`PubSubEmulator` (via
-``PUBSUB_EMULATOR_HOST``) rather than the HTTP interception layer.
+Registers the ``pubsub`` service with the drongo engine on import. The sync
+client is gRPC-first, so it is served by an in-process gRPC
+:class:`PubSubEmulator` (via ``PUBSUB_EMULATOR_HOST``). The async client
+(``gcloud.aio.pubsub``) is aiohttp/REST, so it is served by :class:`PubSubResponse`
+through the aiohttp interceptor. Both are thin adapters over one shared backend.
 """
 
 from __future__ import annotations
@@ -10,12 +12,14 @@ from __future__ import annotations
 from collections.abc import Callable
 
 from drongo.core.registry import ServiceDefinition, register_service
+from drongo.services.pubsub import urls
 from drongo.services.pubsub.emulator import PubSubEmulator
 from drongo.services.pubsub.models import (
     PubSubBackend,
     SubscriptionHandler,
     pubsub_backends,
 )
+from drongo.services.pubsub.responses import PubSubResponse
 
 __all__ = [
     "PubSubBackend",
@@ -73,6 +77,7 @@ register_service(
     ServiceDefinition(
         name="pubsub",
         backends=pubsub_backends,
+        response=PubSubResponse(urls.url_bases, urls.url_paths),
         emulator=PubSubEmulator(pubsub_backends),
     )
 )

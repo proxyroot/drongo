@@ -108,6 +108,41 @@ def test_nack_redelivers():
     assert again.received_messages[0].message.data == b"retry-me"
 ```
 
+## Async client (`gcloud.aio.pubsub`)
+
+The async client is aiohttp/REST, not gRPC, so drongo intercepts aiohttp too and
+serves it from the same backend. Publish over one transport and pull over the
+other; it is one shared state. The mock scope is transport-level, so you drive
+the event loop yourself (`asyncio.run` or `pytest-asyncio`).
+
+```python
+import pytest
+from drongo import mock_gcp
+
+
+@pytest.mark.asyncio
+@mock_gcp
+async def test_async_pubsub():
+    from gcloud.aio.pubsub import PublisherClient, PubsubMessage, SubscriberClient
+
+    topic = "projects/my-project/topics/orders"
+    subscription = "projects/my-project/subscriptions/worker"
+
+    publisher = PublisherClient()
+    subscriber = SubscriberClient()
+    await publisher.create_topic(topic)
+    await subscriber.create_subscription(subscription, topic)
+
+    await publisher.publish(topic, [PubsubMessage(b'{"id": 1}', kind="order")])
+
+    messages = await subscriber.pull(subscription, max_messages=10)
+    assert messages[0].data == b'{"id": 1}'
+    await subscriber.acknowledge(subscription, [messages[0].ack_id])
+
+    await publisher.close()
+    await subscriber.close()
+```
+
 ## Run your actual code
 
 Register a callback for a subscription and drongo pushes each published message
@@ -131,6 +166,7 @@ def on_message(message):
 | Create / get / list / delete subscription | Supported |
 | Publish (with attributes, fan-out to all subs) | Supported |
 | Pull / acknowledge | Supported |
+| Async client (`gcloud.aio.pubsub`, aiohttp/REST) | Supported |
 | Executable handler (publish pushes to your callback) | Supported |
 | Nack via `modify_ack_deadline(0)` (redelivery) | Supported |
 | Streaming pull (`subscribe()`) | Planned |
