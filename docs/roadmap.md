@@ -37,6 +37,18 @@ Legend: ✅ available · 🚧 partial · ⬜ planned
 
 ## Planned services
 
+### Next up — prioritized
+
+These are the next services to build, ahead of the tiers below.
+
+| Service | Client | Notes |
+| --- | --- | --- |
+| Vertex AI / AI Platform | `google-cloud-aiplatform` | datasets, models, endpoints, custom/batch jobs (control plane) |
+| Cloud Monitoring | `google-cloud-monitoring` | metric descriptors, time series write/list, alert policies |
+| Document AI | `google-cloud-documentai` | processors, process / batch-process documents |
+| Artifact Registry | `google-cloud-artifact-registry` | repositories, packages, versions, tags |
+| Storage Transfer | `google-cloud-storage-transfer` | transfer jobs and operations (control plane) |
+
 ### Tier 1 — shipped
 
 Tier 1 is done: Cloud Logging, Cloud KMS, IAM & Service Accounts, Cloud
@@ -59,9 +71,11 @@ table above). The one item still open is:
 
 ### Tier 3 — analytics, ML, platform
 
-Dataflow · Dataproc · Vertex AI · Vision / Speech / Translation / Natural
-Language · GKE (Container) · Cloud Build · Artifact Registry · Cloud DNS ·
-Eventarc · Workflows · Cloud Monitoring · Cloud Trace.
+Dataflow · Dataproc · Vision / Speech / Translation / Natural Language · GKE
+(Container) · Cloud Build · Cloud DNS · Eventarc · Workflows · Cloud Trace.
+
+(Vertex AI, Cloud Monitoring, and Artifact Registry are promoted to
+[Next up](#next-up-prioritized).)
 
 ## Planned capabilities
 
