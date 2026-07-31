@@ -1,0 +1,2215 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Mock Google Cloud Platform services in your tests. The moto for GCP.">
+      
+      
+      
+        <link rel="canonical" href="https://drongo.proxyroot.com/0.6.0/supported-services/">
+      
+      
+        <link rel="prev" href="../quickstart/">
+      
+      
+        <link rel="next" href="../services/storage/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Supported services - drongo</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#supported-services" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="drongo" class="md-header__button md-logo" aria-label="drongo" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            drongo
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Supported services
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="teal"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/proxyroot/drongo" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    proxyroot/drongo
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="drongo" class="md-nav__button md-logo" aria-label="drongo" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    drongo
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/proxyroot/drongo" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    proxyroot/drongo
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quickstart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Supported services
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Supported services
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#cloud-storage-storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cloud Storage (storage)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#secret-manager-secretmanager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Secret Manager (secretmanager)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pubsub-pubsub" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pub/Sub (pubsub)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bigquery-bigquery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        BigQuery (bigquery)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cloud-tasks-cloudtasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cloud Tasks (cloudtasks)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cloud-run-jobs-cloudrun" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cloud Run Jobs (cloudrun)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resource-manager-resourcemanager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resource Manager (resourcemanager)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#firestore-firestore" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Firestore (firestore)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#iam-service-accounts-iam" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        IAM &amp; Service Accounts (iam)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cloud-logging-logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cloud Logging (logging)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cloud-kms-kms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cloud KMS (kms)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cloud-scheduler-cloudscheduler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cloud Scheduler (cloudscheduler)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cloud-functions-cloudfunctions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cloud Functions (cloudfunctions)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#memorystore-for-redis-memorystore" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Memorystore for Redis (memorystore)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#datastore-datastore" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Datastore (datastore)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bigtable-bigtable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bigtable (bigtable)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#planned" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Planned
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Services
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Services
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services/storage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cloud Storage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services/secret-manager/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Secret Manager
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services/pubsub/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pub/Sub
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services/bigquery/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    BigQuery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services/cloud-tasks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cloud Tasks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services/cloud-run-jobs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cloud Run Jobs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services/resource-manager/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Resource Manager
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services/firestore/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Firestore
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services/datastore/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Datastore
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services/bigtable/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Bigtable
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services/iam/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    IAM & Service Accounts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services/cloud-logging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cloud Logging
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services/cloud-kms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cloud KMS
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services/cloud-scheduler/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cloud Scheduler
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services/cloud-functions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cloud Functions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services/memorystore/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Memorystore (Redis)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../executable-handlers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Executable handlers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../seeding/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Generating data
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../server/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Standalone server
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing-a-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing a service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#cloud-storage-storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cloud Storage (storage)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#secret-manager-secretmanager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Secret Manager (secretmanager)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pubsub-pubsub" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pub/Sub (pubsub)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bigquery-bigquery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        BigQuery (bigquery)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cloud-tasks-cloudtasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cloud Tasks (cloudtasks)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cloud-run-jobs-cloudrun" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cloud Run Jobs (cloudrun)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resource-manager-resourcemanager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resource Manager (resourcemanager)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#firestore-firestore" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Firestore (firestore)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#iam-service-accounts-iam" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        IAM &amp; Service Accounts (iam)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cloud-logging-logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cloud Logging (logging)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cloud-kms-kms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cloud KMS (kms)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cloud-scheduler-cloudscheduler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cloud Scheduler (cloudscheduler)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cloud-functions-cloudfunctions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cloud Functions (cloudfunctions)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#memorystore-for-redis-memorystore" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Memorystore for Redis (memorystore)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#datastore-datastore" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Datastore (datastore)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bigtable-bigtable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bigtable (bigtable)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#planned" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Planned
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/proxyroot/drongo/edit/main/docs/supported-services.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="supported-services">Supported services<a class="headerlink" href="#supported-services" title="Permanent link">&para;</a></h1>
+<p>Legend: ✅ supported · 🚧 partial · ⬜ planned</p>
+<h2 id="cloud-storage-storage">Cloud Storage (<code>storage</code>)<a class="headerlink" href="#cloud-storage-storage" title="Permanent link">&para;</a></h2>
+<p>Client: <code>google-cloud-storage</code> · Transport: JSON API (default) · Backend: global
+namespace.</p>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Create / get / list / delete bucket</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Bucket metadata (location, labels, versioning)</td>
+<td>🚧</td>
+</tr>
+<tr>
+<td>Upload - simple (<code>media</code>)</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Upload - multipart</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Upload - resumable (single + chunked)</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Download (full)</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Download with <code>Range</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Object metadata get / patch</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>List objects (prefix + delimiter)</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Delete object</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Copy / rewrite object</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Bucket IAM policy (get / set / test)</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>HMAC keys (create / list / get / update / delete)</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Signed URLs, object ACLs, notifications</td>
+<td>⬜</td>
+</tr>
+</tbody>
+</table>
+<h2 id="secret-manager-secretmanager">Secret Manager (<code>secretmanager</code>)<a class="headerlink" href="#secret-manager-secretmanager" title="Permanent link">&para;</a></h2>
+<p>Client: <code>google-cloud-secret-manager</code> · Transport: gRPC (default), forced to
+REST during a mock scope (no code change needed) · Backend: per-project.</p>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Create / get / list / delete secret</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Update secret (labels)</td>
+<td>🚧</td>
+</tr>
+<tr>
+<td>Add / get / list versions</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Access version (incl. <code>latest</code>)</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Enable / disable / destroy version</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>IAM policy</td>
+<td>⬜</td>
+</tr>
+</tbody>
+</table>
+<h2 id="pubsub-pubsub">Pub/Sub (<code>pubsub</code>)<a class="headerlink" href="#pubsub-pubsub" title="Permanent link">&para;</a></h2>
+<p>Client: <code>google-cloud-pubsub</code> · Transport: gRPC (default), served by an
+in-process gRPC emulator via <code>PUBSUB_EMULATOR_HOST</code> · Backend: global namespace.
+Use the normal client with no <code>transport</code> argument.</p>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Create / get / list / delete topic</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Create / get / list / delete subscription</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Publish (with attributes, fan-out to all subs)</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Pull / acknowledge</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Nack via <code>modifyAckDeadline(0)</code> (redelivery)</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Streaming pull (<code>subscribe()</code>)</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>Ack-deadline expiry / retention</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>IAM, schemas, snapshots, seek</td>
+<td>⬜</td>
+</tr>
+</tbody>
+</table>
+<h2 id="bigquery-bigquery">BigQuery (<code>bigquery</code>)<a class="headerlink" href="#bigquery-bigquery" title="Permanent link">&para;</a></h2>
+<p>Client: <code>google-cloud-bigquery</code> · Transport: REST/JSON (default) · Backend:
+per-project.</p>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Create / get / list / delete dataset</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Create / get / list / delete table (with schema)</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Streaming inserts (<code>insert_rows_json</code> / <code>insertAll</code>)</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Read rows (<code>list_rows</code> / <code>tabledata.list</code>)</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>SQL query execution (<code>client.query(...)</code>)</td>
+<td>⬜ (needs a SQL engine)</td>
+</tr>
+<tr>
+<td>Load/extract/copy jobs, routines, views</td>
+<td>⬜</td>
+</tr>
+</tbody>
+</table>
+<h2 id="cloud-tasks-cloudtasks">Cloud Tasks (<code>cloudtasks</code>)<a class="headerlink" href="#cloud-tasks-cloudtasks" title="Permanent link">&para;</a></h2>
+<p>Client: <code>google-cloud-tasks</code> · Transport: gRPC (default), forced to REST during
+a mock scope (no emulator env var exists) · Backend: per-project. Use the normal
+client with no <code>transport</code> argument.</p>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Create / get / list / delete queue</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Pause / resume / purge queue</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Create / get / list / delete task</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>run_task</code> (marks dispatched)</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Actual task dispatch / delivery to targets</td>
+<td>⬜ (no real network I/O)</td>
+</tr>
+<tr>
+<td>Retry config, rate limits, IAM</td>
+<td>⬜</td>
+</tr>
+</tbody>
+</table>
+<p>Note: because the client is forced onto REST, errors surface as REST-style
+<code>google.api_core.exceptions</code> (e.g. a duplicate queue raises <code>Conflict</code>, not the
+gRPC <code>AlreadyExists</code>). <code>NotFound</code> is the same for both.</p>
+<h2 id="cloud-run-jobs-cloudrun">Cloud Run Jobs (<code>cloudrun</code>)<a class="headerlink" href="#cloud-run-jobs-cloudrun" title="Permanent link">&para;</a></h2>
+<p>Client: <code>google-cloud-run</code> (<code>run_v2.JobsClient</code> / <code>ExecutionsClient</code>) · Transport:
+gRPC (default), forced to REST during a mock scope · Backend: per-project. Use
+the normal clients with no <code>transport</code> argument.</p>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Create / get / list / delete job</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>run_job</code> (creates an execution)</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Executions: get / list / delete</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Long-running operations (<code>.result()</code>)</td>
+<td>✅ (completed synchronously)</td>
+</tr>
+<tr>
+<td>Actual container execution</td>
+<td>⬜ (no real compute)</td>
+</tr>
+<tr>
+<td>Cloud Run <em>services</em> (serving), revisions, traffic</td>
+<td>⬜</td>
+</tr>
+</tbody>
+</table>
+<p>Errors surface as REST-style exceptions (a duplicate job raises <code>Conflict</code>).</p>
+<h2 id="resource-manager-resourcemanager">Resource Manager (<code>resourcemanager</code>)<a class="headerlink" href="#resource-manager-resourcemanager" title="Permanent link">&para;</a></h2>
+<p>Client: <code>google-cloud-resource-manager</code> (<code>resourcemanager_v3.ProjectsClient</code>) ·
+Transport: gRPC (default), forced to REST during a mock scope · Backend: global
+namespace. Use the normal client with no <code>transport</code> argument. Scoped to the
+Projects API.</p>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Create / get project</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Get by <code>project_id</code> or <code>projects/&lt;number&gt;</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>List projects (by <code>parent</code>)</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Search projects</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Delete / undelete project</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Update project (display name, labels)</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Move project, IAM policy, tags</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>Folders, Organizations</td>
+<td>⬜</td>
+</tr>
+</tbody>
+</table>
+<p>Mutations are long-running operations completed synchronously (<code>.result()</code>
+returns immediately). A duplicate project raises <code>Conflict</code>.</p>
+<h2 id="firestore-firestore">Firestore (<code>firestore</code>)<a class="headerlink" href="#firestore-firestore" title="Permanent link">&para;</a></h2>
+<p>Client: <code>google-cloud-firestore</code> · Transport: gRPC (default), served by an
+in-process gRPC emulator via <code>FIRESTORE_EMULATOR_HOST</code> · Backend: global
+namespace. Use the normal client with no <code>transport</code> argument.</p>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Document set / get / update / delete</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>set(merge=True)</code>, <code>collection.add()</code> (auto id)</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Typed values (str/int/float/bool/null/bytes/array/map/timestamp)</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Subcollections</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Queries: <code>where</code>, <code>order_by</code>, <code>limit</code>, <code>offset</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Composite <code>AND</code>/<code>OR</code>, <code>in</code> / <code>array_contains</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Transactions, batched writes</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>Real-time listeners (<code>on_snapshot</code>)</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>Aggregation / collection-group queries</td>
+<td>⬜</td>
+</tr>
+</tbody>
+</table>
+<h2 id="iam-service-accounts-iam">IAM &amp; Service Accounts (<code>iam</code>)<a class="headerlink" href="#iam-service-accounts-iam" title="Permanent link">&para;</a></h2>
+<p>Client: <code>google-cloud-iam</code> (<code>iam_admin_v1.IAMClient</code>) · Transport: gRPC only,
+served by an in-process gRPC emulator with an injected transport (no REST
+transport or emulator env var exists) · Backend: per-project. Use the normal
+client with no <code>transport</code> argument.</p>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Create / get / list / delete service account</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Get by email or unique id</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Enable / disable service account</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Create / list / get / delete key</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Update (display name / description)</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>Roles, IAM policy get/set</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td><code>SignBlob</code> / <code>SignJwt</code></td>
+<td>⬜</td>
+</tr>
+</tbody>
+</table>
+<h2 id="cloud-logging-logging">Cloud Logging (<code>logging</code>)<a class="headerlink" href="#cloud-logging-logging" title="Permanent link">&para;</a></h2>
+<p>Client: <code>google-cloud-logging</code> (<code>logging.Client</code>) · Transport: gRPC only, served
+by an in-process gRPC emulator with an injected transport · Backend: global
+namespace. Use the normal client with no <code>transport</code> argument.</p>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Write entries (<code>log_text</code> / <code>log_struct</code> / <code>log_proto</code>)</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>List entries (by <code>resource_names</code>)</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Ordering (ascending / descending)</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Delete a log; list logs</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Advanced filter language</td>
+<td>⬜ (entries returned unfiltered)</td>
+</tr>
+<tr>
+<td>Sinks / exports, log-based metrics, tail</td>
+<td>⬜</td>
+</tr>
+</tbody>
+</table>
+<h2 id="cloud-kms-kms">Cloud KMS (<code>kms</code>)<a class="headerlink" href="#cloud-kms-kms" title="Permanent link">&para;</a></h2>
+<p>Client: <code>google-cloud-kms</code> (<code>kms.KeyManagementServiceClient</code>) · Transport: gRPC
+(default), forced to REST during a mock scope · Backend: per-project. Use the
+normal client with no <code>transport</code> argument.</p>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Create / get / list key ring</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Create / get / list crypto key</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Encrypt / decrypt (with AAD)</td>
+<td>✅ (reversible mock, not real crypto)</td>
+</tr>
+<tr>
+<td>Crypto-key versions, rotation</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>Asymmetric sign/verify, MAC, raw encrypt</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>IAM policy, import jobs</td>
+<td>⬜</td>
+</tr>
+</tbody>
+</table>
+<h2 id="cloud-scheduler-cloudscheduler">Cloud Scheduler (<code>cloudscheduler</code>)<a class="headerlink" href="#cloud-scheduler-cloudscheduler" title="Permanent link">&para;</a></h2>
+<p>Client: <code>google-cloud-scheduler</code> (<code>scheduler_v1.CloudSchedulerClient</code>) ·
+Transport: gRPC (default), forced to REST during a mock scope · Backend:
+per-project. Use the normal client with no <code>transport</code> argument.</p>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Create / get / list / delete job</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Pause / resume / update</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>run_job</code> (+ executable handler)</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Actual cron scheduling / automatic firing</td>
+<td>⬜ (no real clock)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="cloud-functions-cloudfunctions">Cloud Functions (<code>cloudfunctions</code>)<a class="headerlink" href="#cloud-functions-cloudfunctions" title="Permanent link">&para;</a></h2>
+<p>Client: <code>google-cloud-functions</code> (<code>functions_v2.FunctionServiceClient</code>) ·
+Transport: gRPC (default), forced to REST during a mock scope · Backend:
+per-project. Use the normal client with no <code>transport</code> argument. Scoped to the
+2nd-gen admin API.</p>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Create / get / list / delete function (LRO)</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Update function (LRO)</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>generate_upload_url</code></td>
+<td>✅ (stub)</td>
+</tr>
+<tr>
+<td>Synchronous invoke</td>
+<td>⬜ (2nd gen has no invoke RPC)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="memorystore-for-redis-memorystore">Memorystore for Redis (<code>memorystore</code>)<a class="headerlink" href="#memorystore-for-redis-memorystore" title="Permanent link">&para;</a></h2>
+<p>Client: <code>google-cloud-redis</code> (<code>redis_v1.CloudRedisClient</code>) · Transport: gRPC
+(default), forced to REST during a mock scope · Backend: per-project. Use the
+normal client with no <code>transport</code> argument. Scoped to instance administration.</p>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Create / get / list / delete instance (LRO)</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Update instance (LRO)</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Failover / export / import / upgrade</td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>Redis data plane</td>
+<td>⬜ (use a real Redis)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="datastore-datastore">Datastore (<code>datastore</code>)<a class="headerlink" href="#datastore-datastore" title="Permanent link">&para;</a></h2>
+<p>Client: <code>google-cloud-datastore</code> (<code>datastore.Client</code>) · Transport: gRPC (default),
+served by an in-process gRPC emulator via <code>DATASTORE_EMULATOR_HOST</code> · Backend:
+per-project. Use the normal client with no <code>transport</code> argument.</p>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>put / get / delete (<code>Commit</code> / <code>Lookup</code>)</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Named + auto-id keys (<code>AllocateIds</code>)</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Typed values (str/int/float/bool/null/bytes/array/timestamp/key)</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Queries: kind, filters, order, limit, offset</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Composite <code>AND</code>/<code>OR</code>, <code>IN</code>/<code>NOT_IN</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Transactions (accepted, completed synchronously)</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Ancestor queries, projections, cursors, aggregation</td>
+<td>⬜</td>
+</tr>
+</tbody>
+</table>
+<h2 id="bigtable-bigtable">Bigtable (<code>bigtable</code>)<a class="headerlink" href="#bigtable-bigtable" title="Permanent link">&para;</a></h2>
+<p>Client: <code>google-cloud-bigtable</code> (<code>bigtable.Client</code>) · Transport: gRPC (default),
+served by an in-process gRPC emulator via <code>BIGTABLE_EMULATOR_HOST</code> · Backend:
+per-project. Use the normal client with <code>admin=True</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Create / get / list / delete table, modify families</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>set_cell</code>, versioned cells, deletes</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>read_row</code>, <code>read_rows</code> (ranges, limit)</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Batch <code>mutate_rows</code>, <code>sample_row_keys</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Read filters, <code>check_and_mutate_row</code></td>
+<td>⬜</td>
+</tr>
+<tr>
+<td>Instance admin, change streams, aggregations</td>
+<td>⬜</td>
+</tr>
+</tbody>
+</table>
+<h2 id="planned">Planned<a class="headerlink" href="#planned" title="Permanent link">&para;</a></h2>
+<p>Cloud Spanner · Firestore transactions &amp; listeners · IAM roles &amp; policies · KMS
+key versions · Bigtable read filters. See the
+<a href="https://drongo.proxyroot.com/roadmap/">roadmap</a> and
+<a href="https://github.com/proxyroot/drongo/issues/new/choose">open a service request</a>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Apache-2.0
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.top", "navigation.instant", "content.code.copy", "content.action.edit", "search.suggest", "search.highlight"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
