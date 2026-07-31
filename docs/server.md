@@ -52,6 +52,31 @@ Because the server speaks the real REST/JSON API, any language's SDK can point a
 it the same way. This is what makes drongo usable from a polyglot test suite or
 a docker-compose stack, not just Python.
 
+## Management API
+
+The server exposes a small management API (drongo's analogue of moto's
+`/moto-api`), handy for long-lived servers and non-Python test suites:
+
+| Route | Does |
+| --- | --- |
+| `POST /drongo/reset` | Clears **every** service's in-memory state |
+| `GET /drongo/health` | Reports liveness and the registered services |
+
+```bash
+drongo server --port 9090 &
+
+# Between tests, reset all state over HTTP (from any language):
+curl -X POST http://localhost:9090/drongo/reset
+# -> {"reset": true}
+
+curl http://localhost:9090/drongo/health
+# -> {"status": "ok", "services": ["bigquery", "storage", ...]}
+```
+
+For in-process Python tests you rarely need this - `@mock_gcp` and the `drongo`
+fixture already reset state between tests. The endpoint matters when the server
+is shared across processes or driven from another language.
+
 ## When to use which
 
 | | `@mock_gcp` (in-process) | `drongo server` (HTTP) |
