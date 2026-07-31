@@ -25,6 +25,7 @@ Legend: ✅ available · 🚧 partial · ⬜ planned
 | Cloud Scheduler | forced REST | cron jobs, pause/resume, `run_job` handlers |
 | Cloud Functions | forced REST (LRO) | 2nd-gen deploy/manage functions |
 | Memorystore (Redis) | forced REST (LRO) | instance admin |
+| Vertex AI | forced REST (LRO) | datasets, endpoints, models, custom/batch jobs (control plane) |
 
 ## Available capabilities
 
@@ -43,7 +44,6 @@ These are the next services to build, ahead of the tiers below.
 
 | Service | Client | Notes |
 | --- | --- | --- |
-| Vertex AI / AI Platform | `google-cloud-aiplatform` | datasets, models, endpoints, custom/batch jobs (control plane) |
 | Cloud Monitoring | `google-cloud-monitoring` | metric descriptors, time series write/list, alert policies |
 | Document AI | `google-cloud-documentai` | processors, process / batch-process documents |
 | Artifact Registry | `google-cloud-artifact-registry` | repositories, packages, versions, tags |
@@ -74,7 +74,7 @@ table above). The one item still open is:
 Dataflow · Dataproc · Vision / Speech / Translation / Natural Language · GKE
 (Container) · Cloud Build · Cloud DNS · Eventarc · Workflows · Cloud Trace.
 
-(Vertex AI, Cloud Monitoring, and Artifact Registry are promoted to
+(Cloud Monitoring and Artifact Registry are promoted to
 [Next up](#next-up-prioritized).)
 
 ## Planned capabilities

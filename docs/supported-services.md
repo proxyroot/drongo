@@ -264,10 +264,27 @@ per-project. Use the normal client with `admin=True`.
 | Read filters, `check_and_mutate_row` | ⬜ |
 | Instance admin, change streams, aggregations | ⬜ |
 
+## Vertex AI (`vertexai`)
+
+Client: `google-cloud-aiplatform` (`aiplatform_v1` service clients) · Transport:
+gRPC (default), forced to REST during a mock scope · Backend: per-project. Use the
+normal clients with no `transport` argument; pass the regional endpoint as usual.
+Scoped to the control plane.
+
+| Operation | Status |
+| --- | --- |
+| Datasets: create / get / list / delete (LRO) | ✅ |
+| Endpoints: create / get / list / delete (LRO) | ✅ |
+| Models: upload / get / list / delete (LRO) | ✅ |
+| Custom jobs: create / get / list / cancel / delete | ✅ |
+| Batch prediction jobs: create / get / list / cancel / delete | ✅ |
+| Deploy / undeploy model, online prediction | ⬜ |
+| Pipeline / tuning jobs, feature store, index | ⬜ |
+
 ## Planned
 
-Next up (prioritized): Vertex AI / AI Platform · Cloud Monitoring · Document AI ·
-Artifact Registry · Storage Transfer.
+Next up (prioritized): Cloud Monitoring · Document AI · Artifact Registry ·
+Storage Transfer.
 
 Also planned: Cloud Spanner · Firestore transactions & listeners · IAM roles &
 policies · KMS key versions · Bigtable read filters. See the

@@ -24,6 +24,7 @@ from drongo.services import (
     resourcemanager,
     secretmanager,
     storage,
+    vertexai,
 )
 
 __all__ = [
@@ -43,4 +44,5 @@ __all__ = [
     "resourcemanager",
     "secretmanager",
     "storage",
+    "vertexai",
 ]
