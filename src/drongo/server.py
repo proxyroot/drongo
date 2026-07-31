@@ -20,6 +20,7 @@ Other services accept an explicit endpoint via ``client_options``::
 
 from __future__ import annotations
 
+import json
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
@@ -29,6 +30,31 @@ from drongo.core.responses import BaseResponse, HttpResponse
 # Backends are shared mutable state; serialise request handling so the
 # threading server stays correct without sprinkling locks through every model.
 _LOCK = threading.Lock()
+
+
+def _json(status: int, payload: dict) -> HttpResponse:
+    return status, {"Content-Type": "application/json"}, json.dumps(payload)
+
+
+def _management(method: str, path: str) -> HttpResponse:
+    """drongo's management API, analogous to moto's ``/moto-api``.
+
+    * ``POST /drongo/reset`` clears every service's in-memory state, so a
+      long-lived server can be reset between tests (including from non-Python
+      test suites).
+    * ``GET /drongo/health`` reports liveness and the registered services.
+    """
+    if method == "POST" and path == "/drongo/reset":
+        with _LOCK:
+            registry.reset_all_backends()
+        return _json(200, {"reset": True})
+    if method == "GET" and path == "/drongo/health":
+        services = [service.name for service in registry.iter_services()]
+        return _json(200, {"status": "ok", "services": services})
+    return _json(
+        404,
+        {"error": {"code": 404, "message": f"drongo: unknown management route {path}"}},
+    )
 
 
 class _RequestShim:
@@ -52,6 +78,11 @@ class DrongoHTTPRequestHandler(BaseHTTPRequestHandler):
         body = self.rfile.read(length) if length else b""
         shim = _RequestShim(self.command, self.path, dict(self.headers), body)
         request = BaseResponse.decode(shim)
+
+        # drongo's own management API (like moto's /moto-api), before services.
+        if request.path.startswith("/drongo/"):
+            self._write(_management(request.method, request.path))
+            return
 
         with _LOCK:
             for service in registry.iter_services():
