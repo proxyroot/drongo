@@ -69,6 +69,7 @@ test = [
     "google-cloud-functions>=1.13",
     "google-cloud-redis>=2.13",
     "google-cloud-datastore>=2.15",
+    "google-cloud-bigtable>=2.21",
     "faker>=20",
 ]
 dev = [
