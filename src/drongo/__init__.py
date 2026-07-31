@@ -45,6 +45,7 @@ _SERVICE_MODULES = frozenset(
         "kms",
         "logging",
         "memorystore",
+        "monitoring",
         "pubsub",
         "resourcemanager",
         "secretmanager",

@@ -282,10 +282,25 @@ Scoped to the control plane.
 | Batch prediction jobs: create / get / list / cancel / delete | ✅ |
 | Raw predict / explain, pipeline / tuning jobs, feature store, index | ⬜ |
 
+## Cloud Monitoring (`monitoring`)
+
+Client: `google-cloud-monitoring` (`monitoring_v3` service clients) · Transport:
+gRPC only, served by an in-process gRPC emulator with an injected transport ·
+Backend: per-project. Use the normal clients with no `transport` argument.
+
+| Operation | Status |
+| --- | --- |
+| Metric descriptors: create / get / list / delete | ✅ |
+| Time series: write (`create_time_series`) | ✅ |
+| Time series: read (`list_time_series`, filter + interval) | ✅ |
+| Alert policies: create / get / list / update / delete | ✅ |
+| Notification channels: create / get / list / update / delete | ✅ |
+| Aggregation (alignment / reduction), MQL query | ⬜ |
+| Uptime checks, SLOs, groups, snoozes | ⬜ |
+
 ## Planned
 
-Next up (prioritized): Cloud Monitoring · Document AI · Artifact Registry ·
-Storage Transfer.
+Next up (prioritized): Document AI · Artifact Registry · Storage Transfer.
 
 Also planned: Cloud Spanner · Firestore transactions & listeners · IAM roles &
 policies · KMS key versions · Bigtable read filters. See the
