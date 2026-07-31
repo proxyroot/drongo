@@ -49,6 +49,7 @@ _SERVICE_MODULES = frozenset(
         "resourcemanager",
         "secretmanager",
         "storage",
+        "vertexai",
     }
 )
 

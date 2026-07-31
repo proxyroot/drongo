@@ -27,6 +27,7 @@ when the `mock_gcp` scope resets between tests.
 | Cloud Tasks | `cloudtasks.task_handler(queue)` | `run_task`; `create_task` on a running queue | a `TaskRequest` |
 | Pub/Sub | `pubsub.subscription_handler(sub)` | `publish` fans out to the subscription | a `PushMessage` |
 | Cloud Scheduler | `cloudscheduler.job_handler(job)` | `run_job` | a `SchedulerRequest` |
+| Vertex AI | `vertexai.prediction_handler(endpoint)` | `predict` on the endpoint | `(instances, parameters)` |
 
 ## Cloud Run Jobs
 
@@ -161,4 +162,7 @@ from drongo import get_backend
 get_backend("cloudrun")["my-project"].register_handler(job_name, my_fn)
 get_backend("cloudtasks")["my-project"].register_handler(queue_name, my_fn)
 get_backend("pubsub")["my-project"].register_handler(sub_name, my_fn)
+
+# Vertex AI's predict handler has its own name:
+get_backend("vertexai")["my-project"].register_prediction_handler(endpoint_name, my_fn)
 ```
