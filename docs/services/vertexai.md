@@ -82,14 +82,59 @@ def test_vertex_jobs():
 
 Missing resources raise `google.api_core.exceptions.NotFound`.
 
+## Deploy a model and serve predictions
+
+Deploy a model to an endpoint, then register a **prediction handler** so
+`predict` runs your own code (like the Cloud Run / Pub/Sub executable handlers):
+
+```python
+from drongo import mock_gcp, vertexai
+from google.api_core.client_options import ClientOptions
+
+
+@mock_gcp
+def test_predict():
+    from google.cloud import aiplatform_v1
+
+    location = "us-central1"
+    parent = f"projects/my-project/locations/{location}"
+    opts = ClientOptions(api_endpoint=f"{location}-aiplatform.googleapis.com")
+
+    endpoints = aiplatform_v1.EndpointServiceClient(client_options=opts)
+    endpoint = endpoints.create_endpoint(
+        parent=parent, endpoint=aiplatform_v1.Endpoint(display_name="serve")
+    ).result()
+
+    models = aiplatform_v1.ModelServiceClient(client_options=opts)
+    model = models.upload_model(
+        parent=parent, model=aiplatform_v1.Model(display_name="m")
+    ).result().model
+    endpoints.deploy_model(
+        endpoint=endpoint.name,
+        deployed_model=aiplatform_v1.DeployedModel(model=model),
+        traffic_split={"0": 100},
+    ).result()
+
+    @vertexai.prediction_handler(endpoint.name)
+    def handler(instances, parameters):
+        return [{"score": len(instances)} for _ in instances]
+
+    prediction = aiplatform_v1.PredictionServiceClient(client_options=opts)
+    response = prediction.predict(endpoint=endpoint.name, instances=[{"a": 1}])
+    assert [dict(p) for p in response.predictions] == [{"score": 1}]
+```
+
+With no handler registered, `predict` returns an empty prediction list.
+
 ## Coverage
 
 | Operation | Status |
 | --- | --- |
 | Datasets: create / get / list / delete (LRO) | Supported |
 | Endpoints: create / get / list / delete (LRO) | Supported |
+| Deploy / undeploy model (LRO) | Supported |
+| Online prediction (`predict`, via a handler) | Supported |
 | Models: upload / get / list / delete (LRO) | Supported |
 | Custom jobs: create / get / list / cancel / delete | Supported |
 | Batch prediction jobs: create / get / list / cancel / delete | Supported |
-| Deploy / undeploy model, predict / online prediction | Planned |
-| Pipeline jobs, tuning jobs, feature store, index | Planned |
+| Raw predict / explain, pipeline / tuning jobs, feature store, index | Planned |

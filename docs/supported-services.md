@@ -275,11 +275,12 @@ Scoped to the control plane.
 | --- | --- |
 | Datasets: create / get / list / delete (LRO) | ✅ |
 | Endpoints: create / get / list / delete (LRO) | ✅ |
+| Deploy / undeploy model (LRO) | ✅ |
+| Online prediction (`predict`, via a handler) | ✅ |
 | Models: upload / get / list / delete (LRO) | ✅ |
 | Custom jobs: create / get / list / cancel / delete | ✅ |
 | Batch prediction jobs: create / get / list / cancel / delete | ✅ |
-| Deploy / undeploy model, online prediction | ⬜ |
-| Pipeline / tuning jobs, feature store, index | ⬜ |
+| Raw predict / explain, pipeline / tuning jobs, feature store, index | ⬜ |
 
 ## Planned
 

@@ -23,7 +23,10 @@ url_paths = {
     f"GET {_P}/datasets": R.list_datasets,
     f"GET {_DATASET}": R.get_dataset,
     f"DELETE {_DATASET}": R.delete_dataset,
-    # Endpoints.
+    # Endpoints (custom verbs first).
+    f"POST {_ENDPOINT}:deployModel": R.deploy_model,
+    f"POST {_ENDPOINT}:undeployModel": R.undeploy_model,
+    f"POST {_ENDPOINT}:predict": R.predict,
     f"POST {_P}/endpoints": R.create_endpoint,
     f"GET {_P}/endpoints": R.list_endpoints,
     f"GET {_ENDPOINT}": R.get_endpoint,

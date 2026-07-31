@@ -14,17 +14,26 @@ Jobs (custom, batch prediction) are created synchronously and returned directly.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from datetime import datetime, timezone
 from typing import Any
 
 from drongo.core import exceptions
 from drongo.core.backend import BackendDict, BaseBackend
 
+__all__ = ["PredictionHandler", "VertexAIBackend", "vertexai_backends"]
+
 _TYPE_PREFIX = "type.googleapis.com/google.cloud.aiplatform.v1."
 DATASET_TYPE = _TYPE_PREFIX + "Dataset"
 ENDPOINT_TYPE = _TYPE_PREFIX + "Endpoint"
 UPLOAD_MODEL_RESPONSE_TYPE = _TYPE_PREFIX + "UploadModelResponse"
+DEPLOY_MODEL_RESPONSE_TYPE = _TYPE_PREFIX + "DeployModelResponse"
+UNDEPLOY_MODEL_RESPONSE_TYPE = _TYPE_PREFIX + "UndeployModelResponse"
 EMPTY_TYPE = "type.googleapis.com/google.protobuf.Empty"
+
+#: A prediction handler receives ``(instances, parameters)`` and returns the list
+#: of predictions, so a test can run real prediction logic on a mocked endpoint.
+PredictionHandler = Callable[[list[Any], dict[str, Any]], list[Any]]
 
 
 def _now() -> str:
@@ -41,6 +50,7 @@ class VertexAIBackend(BaseBackend):
     def setup(self) -> None:
         self.resources: dict[str, dict[str, Any]] = {}
         self.operations: dict[str, dict[str, Any]] = {}
+        self.prediction_handlers: dict[str, PredictionHandler] = {}
         self._counter = 0
 
     def _next(self) -> int:
@@ -89,7 +99,7 @@ class VertexAIBackend(BaseBackend):
         except KeyError:
             raise exceptions.not_found(f"Resource not found: {name}")
 
-    def list(self, parent: str, collection: str) -> list[dict[str, Any]]:
+    def list_resources(self, parent: str, collection: str) -> list[dict[str, Any]]:
         prefix = f"{parent}/{collection}/"
         return [
             self.resources[n] for n in sorted(self.resources) if n.startswith(prefix)
@@ -104,6 +114,53 @@ class VertexAIBackend(BaseBackend):
         resource["state"] = state
         resource["updateTime"] = _now()
         return resource
+
+    # -- serving (deploy / undeploy / predict) ----------------------------
+
+    def deploy_model(
+        self, endpoint: str, deployed_model: dict[str, Any], traffic_split: dict
+    ) -> dict[str, Any]:
+        """Attach a model to an endpoint; return the deployed-model resource."""
+        resource = self.get(endpoint)
+        deployed = dict(deployed_model or {})
+        deployed.setdefault("id", str(self._next()))
+        resource.setdefault("deployedModels", []).append(deployed)
+        if traffic_split:
+            resource["trafficSplit"] = dict(traffic_split)
+        resource["updateTime"] = _now()
+        return deployed
+
+    def undeploy_model(
+        self, endpoint: str, deployed_model_id: str, traffic_split: dict
+    ) -> None:
+        resource = self.get(endpoint)
+        resource["deployedModels"] = [
+            d
+            for d in resource.get("deployedModels", [])
+            if d.get("id") != deployed_model_id
+        ]
+        resource["trafficSplit"] = dict(traffic_split or {})
+        resource["updateTime"] = _now()
+
+    def register_prediction_handler(
+        self, endpoint: str, handler: PredictionHandler
+    ) -> None:
+        """Bind a callable that produces predictions for an endpoint's ``predict``."""
+        self.prediction_handlers[endpoint] = handler
+
+    def predict(
+        self, endpoint: str, instances: list[Any], parameters: dict[str, Any]
+    ) -> dict[str, Any]:
+        """Run the endpoint's registered handler (or return no predictions)."""
+        resource = self.get(endpoint)
+        handler = self.prediction_handlers.get(endpoint)
+        predictions = handler(instances, parameters) if handler is not None else []
+        deployed = resource.get("deployedModels") or [{}]
+        return {
+            "predictions": predictions,
+            "deployedModelId": deployed[0].get("id", ""),
+            "model": deployed[0].get("model", ""),
+        }
 
 
 #: Project-keyed backends, inspectable via ``get_backend("vertexai")[project]``.

@@ -11,8 +11,10 @@ from __future__ import annotations
 from drongo.core.responses import BaseResponse, HttpResponse, Request, json_response
 from drongo.services.vertexai.models import (
     DATASET_TYPE,
+    DEPLOY_MODEL_RESPONSE_TYPE,
     EMPTY_TYPE,
     ENDPOINT_TYPE,
+    UNDEPLOY_MODEL_RESPONSE_TYPE,
     UPLOAD_MODEL_RESPONSE_TYPE,
     VertexAIBackend,
     vertexai_backends,
@@ -48,7 +50,9 @@ class VertexAIResponse(BaseResponse):
         )
 
     def list_datasets(self, request: Request) -> HttpResponse:
-        datasets = self.backend_for(request).list(self._parent(request), "datasets")
+        datasets = self.backend_for(request).list_resources(
+            self._parent(request), "datasets"
+        )
         return json_response({"datasets": datasets})
 
     def delete_dataset(self, request: Request) -> HttpResponse:
@@ -76,7 +80,9 @@ class VertexAIResponse(BaseResponse):
         )
 
     def list_endpoints(self, request: Request) -> HttpResponse:
-        endpoints = self.backend_for(request).list(self._parent(request), "endpoints")
+        endpoints = self.backend_for(request).list_resources(
+            self._parent(request), "endpoints"
+        )
         return json_response({"endpoints": endpoints})
 
     def delete_endpoint(self, request: Request) -> HttpResponse:
@@ -85,6 +91,40 @@ class VertexAIResponse(BaseResponse):
         return json_response(
             backend.operation(self._parent(request), {"@type": EMPTY_TYPE})
         )
+
+    def deploy_model(self, request: Request) -> HttpResponse:
+        parent = self._parent(request)
+        backend = self.backend_for(request)
+        body = request.json()
+        deployed = backend.deploy_model(
+            self._name(request, "endpoints", "endpoint"),
+            body.get("deployedModel", {}),
+            body.get("trafficSplit", {}),
+        )
+        response = {"@type": DEPLOY_MODEL_RESPONSE_TYPE, "deployedModel": deployed}
+        return json_response(backend.operation(parent, response))
+
+    def undeploy_model(self, request: Request) -> HttpResponse:
+        parent = self._parent(request)
+        backend = self.backend_for(request)
+        body = request.json()
+        backend.undeploy_model(
+            self._name(request, "endpoints", "endpoint"),
+            body.get("deployedModelId", ""),
+            body.get("trafficSplit", {}),
+        )
+        return json_response(
+            backend.operation(parent, {"@type": UNDEPLOY_MODEL_RESPONSE_TYPE})
+        )
+
+    def predict(self, request: Request) -> HttpResponse:
+        body = request.json()
+        result = self.backend_for(request).predict(
+            self._name(request, "endpoints", "endpoint"),
+            body.get("instances", []),
+            body.get("parameters", {}),
+        )
+        return json_response(result)
 
     # -- models ------------------------------------------------------------
 
@@ -108,7 +148,9 @@ class VertexAIResponse(BaseResponse):
         )
 
     def list_models(self, request: Request) -> HttpResponse:
-        models = self.backend_for(request).list(self._parent(request), "models")
+        models = self.backend_for(request).list_resources(
+            self._parent(request), "models"
+        )
         return json_response({"models": models})
 
     def delete_model(self, request: Request) -> HttpResponse:
@@ -132,7 +174,9 @@ class VertexAIResponse(BaseResponse):
         )
 
     def list_custom_jobs(self, request: Request) -> HttpResponse:
-        jobs = self.backend_for(request).list(self._parent(request), "customJobs")
+        jobs = self.backend_for(request).list_resources(
+            self._parent(request), "customJobs"
+        )
         return json_response({"customJobs": jobs})
 
     def cancel_custom_job(self, request: Request) -> HttpResponse:
@@ -164,7 +208,7 @@ class VertexAIResponse(BaseResponse):
         )
 
     def list_batch_prediction_jobs(self, request: Request) -> HttpResponse:
-        jobs = self.backend_for(request).list(
+        jobs = self.backend_for(request).list_resources(
             self._parent(request), "batchPredictionJobs"
         )
         return json_response({"batchPredictionJobs": jobs})

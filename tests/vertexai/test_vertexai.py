@@ -87,6 +87,79 @@ def test_endpoint_create_get_list_delete() -> None:
     assert list(client.list_endpoints(parent=PARENT)) == []
 
 
+def test_deploy_undeploy_model() -> None:
+    from google.cloud import aiplatform_v1
+
+    endpoints = _endpoint_client()
+    endpoint = endpoints.create_endpoint(
+        parent=PARENT, endpoint=aiplatform_v1.Endpoint(display_name="serve")
+    ).result()
+    model = (
+        _model_client()
+        .upload_model(parent=PARENT, model=aiplatform_v1.Model(display_name="m"))
+        .result()
+        .model
+    )
+
+    deployed = endpoints.deploy_model(
+        endpoint=endpoint.name,
+        deployed_model=aiplatform_v1.DeployedModel(model=model, display_name="dm"),
+        traffic_split={"0": 100},
+    ).result()
+    dm_id = deployed.deployed_model.id
+    assert deployed.deployed_model.model == model
+    assert [
+        d.id for d in endpoints.get_endpoint(name=endpoint.name).deployed_models
+    ] == [dm_id]
+
+    endpoints.undeploy_model(endpoint=endpoint.name, deployed_model_id=dm_id).result()
+    assert list(endpoints.get_endpoint(name=endpoint.name).deployed_models) == []
+
+
+def test_predict_runs_registered_handler() -> None:
+    from google.cloud import aiplatform_v1
+
+    from drongo.services import vertexai
+
+    endpoint = (
+        _endpoint_client()
+        .create_endpoint(
+            parent=PARENT, endpoint=aiplatform_v1.Endpoint(display_name="serve")
+        )
+        .result()
+    )
+
+    @vertexai.prediction_handler(endpoint.name)
+    def handler(instances, parameters):
+        return [{"score": len(instances)} for _ in instances]
+
+    from google.cloud import aiplatform_v1 as v1
+
+    predictions = v1.PredictionServiceClient(client_options=_OPTS).predict(
+        endpoint=endpoint.name, instances=[{"a": 1}, {"b": 2}]
+    )
+    assert [dict(p) for p in predictions.predictions] == [
+        {"score": 2},
+        {"score": 2},
+    ]
+
+
+def test_predict_without_handler_returns_no_predictions() -> None:
+    from google.cloud import aiplatform_v1
+
+    endpoint = (
+        _endpoint_client()
+        .create_endpoint(
+            parent=PARENT, endpoint=aiplatform_v1.Endpoint(display_name="serve")
+        )
+        .result()
+    )
+    response = aiplatform_v1.PredictionServiceClient(client_options=_OPTS).predict(
+        endpoint=endpoint.name, instances=[{"a": 1}]
+    )
+    assert list(response.predictions) == []
+
+
 # -- models -----------------------------------------------------------------
 
 
