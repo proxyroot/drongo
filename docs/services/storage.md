@@ -120,6 +120,33 @@ def test_inspect():
     assert "b" in get_backend("storage")["p"].buckets
 ```
 
+## Bucket IAM and HMAC keys
+
+Bucket IAM policies and project HMAC keys are supported:
+
+```python
+@mock_gcp
+def test_iam_and_hmac():
+    from google.cloud import storage
+
+    client = storage.Client(project="p")
+    bucket = client.create_bucket("b")
+
+    policy = bucket.get_iam_policy()
+    policy.bindings.append(
+        {"role": "roles/storage.objectViewer", "members": {"allUsers"}}
+    )
+    bucket.set_iam_policy(policy)
+
+    metadata, secret = client.create_hmac_key(
+        service_account_email="svc@p.iam.gserviceaccount.com"
+    )
+    assert secret  # returned only on create
+    metadata.state = "INACTIVE"
+    metadata.update()
+    metadata.delete()  # must be INACTIVE first, like real GCS
+```
+
 ## Coverage
 
 | Operation | Status |
@@ -135,4 +162,6 @@ def test_inspect():
 | List objects (prefix + delimiter) | Supported |
 | Delete object | Supported |
 | Copy / rewrite object | Supported |
-| Signed URLs, ACLs, IAM, notifications | Planned |
+| Bucket IAM policy (get / set / test permissions) | Supported |
+| HMAC keys (create / list / get / update / delete) | Supported |
+| Signed URLs, object ACLs, notifications | Planned |

@@ -55,6 +55,67 @@ class StorageResponse(BaseResponse):
         bucket = self.backend.get_bucket(request.path_params["bucket"])
         return json_response(bucket.to_resource())
 
+    # -- bucket IAM policy -------------------------------------------------
+
+    def get_bucket_iam(self, request: Request) -> HttpResponse:
+        return json_response(self.backend.get_iam_policy(request.path_params["bucket"]))
+
+    def set_bucket_iam(self, request: Request) -> HttpResponse:
+        policy = self.backend.set_iam_policy(
+            request.path_params["bucket"], request.json()
+        )
+        return json_response(policy)
+
+    def test_bucket_iam(self, request: Request) -> HttpResponse:
+        self.backend.get_bucket(request.path_params["bucket"])  # 404 if missing
+        permissions = request.query.get("permissions", [])
+        return json_response(
+            {
+                "kind": "storage#testIamPermissionsResponse",
+                "permissions": list(permissions),
+            }
+        )
+
+    # -- HMAC keys ---------------------------------------------------------
+
+    def create_hmac_key(self, request: Request) -> HttpResponse:
+        project = request.path_params["project"]
+        email = request.param("serviceAccountEmail") or ""
+        if not email:
+            raise exceptions.bad_request("Required parameter: serviceAccountEmail")
+        key = self.backend.create_hmac_key(project, email)
+        return json_response(
+            {
+                "kind": "storage#hmacKey",
+                "metadata": key.metadata_resource(),
+                "secret": key.secret,
+            }
+        )
+
+    def list_hmac_keys(self, request: Request) -> HttpResponse:
+        keys = self.backend.list_hmac_keys(request.path_params["project"])
+        return json_response(
+            {
+                "kind": "storage#hmacKeysMetadata",
+                "items": [k.metadata_resource() for k in keys],
+            }
+        )
+
+    def get_hmac_key(self, request: Request) -> HttpResponse:
+        key = self.backend.get_hmac_key(request.path_params["access_id"])
+        return json_response(key.metadata_resource())
+
+    def update_hmac_key(self, request: Request) -> HttpResponse:
+        body = request.json()
+        key = self.backend.update_hmac_key(
+            request.path_params["access_id"], body.get("state", "ACTIVE")
+        )
+        return json_response(key.metadata_resource())
+
+    def delete_hmac_key(self, request: Request) -> HttpResponse:
+        self.backend.delete_hmac_key(request.path_params["access_id"])
+        return json_response({})
+
     def patch_bucket(self, request: Request) -> HttpResponse:
         bucket = self.backend.get_bucket(request.path_params["bucket"])
         body = request.json()

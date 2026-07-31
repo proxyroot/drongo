@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import base64
 from dataclasses import dataclass, field
+from typing import Any
 from urllib.parse import quote
 
 from drongo.core import exceptions
@@ -11,6 +13,32 @@ from drongo.core.utils import crc32c_base64, md5_base64, now_rfc3339
 
 #: Base endpoint used when rendering ``selfLink``/``mediaLink`` fields.
 STORAGE_ENDPOINT = "https://storage.googleapis.com"
+
+
+@dataclass
+class HmacKey:
+    """An HMAC key for a service account (used for S3-interop / signed URLs)."""
+
+    access_id: str
+    service_account_email: str
+    project: str
+    secret: str
+    state: str = "ACTIVE"
+    time_created: str = field(default_factory=now_rfc3339)
+    updated: str = field(default_factory=now_rfc3339)
+
+    def metadata_resource(self) -> dict[str, Any]:
+        return {
+            "kind": "storage#hmacKeyMetadata",
+            "id": f"{self.project}/{self.access_id}",
+            "accessId": self.access_id,
+            "projectId": self.project,
+            "serviceAccountEmail": self.service_account_email,
+            "state": self.state,
+            "timeCreated": self.time_created,
+            "updated": self.updated,
+            "etag": f"{self.access_id}/{self.state}",
+        }
 
 
 @dataclass
@@ -102,6 +130,7 @@ class Bucket:
     time_created: str = field(default_factory=now_rfc3339)
     updated: str = field(default_factory=now_rfc3339)
     blobs: dict[str, Blob] = field(default_factory=dict)
+    iam_policy: dict[str, Any] | None = None
 
     def to_resource(self) -> dict:
         resource: dict = {
@@ -134,7 +163,76 @@ class StorageBackend(BaseBackend):
         self.buckets: dict[str, Bucket] = {}
         # Live resumable-upload sessions keyed by upload id (see the responses).
         self.resumable_uploads: dict[str, dict] = {}
+        self.hmac_keys: dict[str, HmacKey] = {}
         self._clock = 1
+
+    # -- bucket IAM policy -------------------------------------------------
+
+    def get_iam_policy(self, bucket_name: str) -> dict[str, Any]:
+        bucket = self.get_bucket(bucket_name)
+        if bucket.iam_policy is None:
+            return {
+                "kind": "storage#policy",
+                "resourceId": f"projects/_/buckets/{bucket_name}",
+                "version": 1,
+                "bindings": [],
+                "etag": "CAE=",
+            }
+        return bucket.iam_policy
+
+    def set_iam_policy(
+        self, bucket_name: str, policy: dict[str, Any]
+    ) -> dict[str, Any]:
+        bucket = self.get_bucket(bucket_name)
+        stored = {
+            "kind": "storage#policy",
+            "resourceId": f"projects/_/buckets/{bucket_name}",
+            "version": policy.get("version", 1),
+            "bindings": policy.get("bindings", []),
+            "etag": policy.get("etag", "CAE="),
+        }
+        bucket.iam_policy = stored
+        return stored
+
+    # -- HMAC keys ---------------------------------------------------------
+
+    def create_hmac_key(self, project: str, email: str) -> HmacKey:
+        access_id = f"GOOG{self._tick():032X}"
+        secret = base64.b64encode(f"drongo-secret-{access_id}".encode()).decode("ascii")
+        key = HmacKey(
+            access_id=access_id,
+            service_account_email=email,
+            project=project,
+            secret=secret,
+        )
+        self.hmac_keys[access_id] = key
+        return key
+
+    def list_hmac_keys(self, project: str) -> list[HmacKey]:
+        return sorted(
+            (k for k in self.hmac_keys.values() if k.project == project),
+            key=lambda k: k.access_id,
+        )
+
+    def get_hmac_key(self, access_id: str) -> HmacKey:
+        try:
+            return self.hmac_keys[access_id]
+        except KeyError:
+            raise exceptions.not_found(f"HMAC key not found: {access_id}")
+
+    def update_hmac_key(self, access_id: str, state: str) -> HmacKey:
+        key = self.get_hmac_key(access_id)
+        key.state = state
+        key.updated = now_rfc3339()
+        return key
+
+    def delete_hmac_key(self, access_id: str) -> None:
+        key = self.get_hmac_key(access_id)
+        if key.state != "INACTIVE":
+            raise exceptions.bad_request(
+                "HMAC key must be INACTIVE before it can be deleted"
+            )
+        del self.hmac_keys[access_id]
 
     def tick(self) -> int:
         """Public monotonic counter used for generations and upload ids."""
