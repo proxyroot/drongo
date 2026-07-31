@@ -260,7 +260,11 @@ class MonitoringEmulator(BaseEmulator):
         resource = _first(_RESOURCE_TYPE, filter_str)
         interval = req.get("interval", {})
         series = self._backend(req["name"]).list_time_series(
-            metric, resource, interval.get("start_time"), interval.get("end_time")
+            metric,
+            resource,
+            interval.get("start_time"),
+            interval.get("end_time"),
+            req.get("aggregation"),
         )
         return self._mt.ListTimeSeriesResponse({"time_series": series})
 

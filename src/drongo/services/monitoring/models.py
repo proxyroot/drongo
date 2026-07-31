@@ -32,6 +32,7 @@ class MonitoringBackend(BaseBackend):
         self.time_series: list[dict[str, Any]] = []
         self.alert_policies: dict[str, dict[str, Any]] = {}
         self.notification_channels: dict[str, dict[str, Any]] = {}
+        self._series_index: dict[tuple, dict[str, Any]] = {}
         self._counter = 0
 
     def _next(self) -> int:
@@ -64,7 +65,22 @@ class MonitoringBackend(BaseBackend):
     # -- time series -------------------------------------------------------
 
     def create_time_series(self, series: list[dict[str, Any]]) -> None:
-        self.time_series.extend(series)
+        """Store points, merging into the existing series of the same identity.
+
+        A time series is identified by its metric (type + labels) and monitored
+        resource, so repeated writes to the same identity accumulate points on one
+        series - as they do in real Monitoring - rather than piling up duplicates.
+        """
+        for incoming in series:
+            key = _identity(incoming)
+            existing = self._series_index.get(key)
+            if existing is not None:
+                existing.setdefault("points", []).extend(incoming.get("points", []))
+            else:
+                stored = dict(incoming)
+                stored["points"] = list(incoming.get("points", []))
+                self.time_series.append(stored)
+                self._series_index[key] = stored
 
     def list_time_series(
         self,
@@ -72,8 +88,13 @@ class MonitoringBackend(BaseBackend):
         resource_type: str | None,
         start_time: str | None,
         end_time: str | None,
+        aggregation: dict[str, Any] | None = None,
     ) -> list[dict[str, Any]]:
-        """Return stored series matching the metric/resource, points in window."""
+        """Return stored series matching the metric/resource, points in window.
+
+        When an ``aggregation`` is supplied its per-series aligner and
+        cross-series reducer are applied over scalar points (see ``_aggregate``).
+        """
         start, end = _epoch(start_time), _epoch(end_time)
         result: list[dict[str, Any]] = []
         for series in self.time_series:
@@ -89,6 +110,8 @@ class MonitoringBackend(BaseBackend):
                 matched = dict(series)
                 matched["points"] = points
                 result.append(matched)
+        if aggregation:
+            result = _aggregate(result, aggregation, end)
         return result
 
     # -- alert policies ----------------------------------------------------
@@ -154,6 +177,18 @@ class MonitoringBackend(BaseBackend):
         return stored
 
 
+def _identity(series: dict[str, Any]) -> tuple:
+    """The (metric, resource) identity that uniquely names a time series."""
+    metric = series.get("metric", {})
+    resource = series.get("resource", {})
+    return (
+        metric.get("type"),
+        tuple(sorted((metric.get("labels") or {}).items())),
+        resource.get("type"),
+        tuple(sorted((resource.get("labels") or {}).items())),
+    )
+
+
 def _apply_update(
     stored: dict[str, Any], incoming: dict[str, Any], paths: list[str]
 ) -> None:
@@ -189,6 +224,217 @@ def _epoch(rfc3339: str | None) -> float | None:
         return datetime.fromisoformat(text).replace(tzinfo=timezone.utc).timestamp()
     except ValueError:
         return None
+
+
+# -- aggregation -----------------------------------------------------------
+#
+# A subset of Cloud Monitoring's aggregation: per-series alignment into
+# fixed-width buckets, then optional cross-series reduction grouped by label
+# fields. Scalar values only (double / int64 / bool); distributions pass through
+# unaggregated. RATE/DELTA are approximated (sum over the period, or sum/period).
+
+
+def _aggregate(
+    series_list: list[dict[str, Any]], aggregation: dict[str, Any], anchor: float | None
+) -> list[dict[str, Any]]:
+    period = _duration_seconds(aggregation.get("alignment_period"))
+    aligner = aggregation.get("per_series_aligner") or "ALIGN_NONE"
+    reducer = aggregation.get("cross_series_reducer") or "REDUCE_NONE"
+    group_by = aggregation.get("group_by_fields") or []
+    aligned = [_align_series(s, aligner, period, anchor) for s in series_list]
+    if reducer in ("", "REDUCE_NONE"):
+        return aligned
+    return _reduce_series(aligned, reducer, group_by)
+
+
+def _align_series(
+    series: dict[str, Any], aligner: str, period: float | None, anchor: float | None
+) -> dict[str, Any]:
+    if aligner in ("", "ALIGN_NONE") or not period:
+        return series
+    buckets: dict[float, list[tuple[float, bool]]] = {}
+    for point in series.get("points", []):
+        value = _point_value(point)
+        moment = _epoch(point.get("interval", {}).get("end_time"))
+        if value is None or moment is None:
+            continue
+        base = anchor if anchor is not None else moment
+        index = int((base - moment) // period)
+        bucket_end = base - index * period
+        buckets.setdefault(bucket_end, []).append(value)
+    points = [
+        _make_point(
+            bucket_end, period, *_align_bucket(buckets[bucket_end], aligner, period)
+        )
+        for bucket_end in sorted(buckets, reverse=True)
+    ]
+    return {
+        "metric": series.get("metric", {}),
+        "resource": series.get("resource", {}),
+        "points": points,
+    }
+
+
+def _align_bucket(
+    values: list[tuple[float, bool]], aligner: str, period: float
+) -> tuple[float, bool]:
+    nums = [v for v, _ in values]
+    all_int = all(is_int for _, is_int in values)
+    if aligner == "ALIGN_MEAN":
+        return sum(nums) / len(nums), False
+    if aligner in ("ALIGN_SUM", "ALIGN_DELTA"):
+        return sum(nums), all_int
+    if aligner == "ALIGN_MIN":
+        return min(nums), all_int
+    if aligner == "ALIGN_MAX":
+        return max(nums), all_int
+    if aligner == "ALIGN_COUNT":
+        return float(len(nums)), True
+    if aligner == "ALIGN_RATE":
+        return sum(nums) / period, False
+    return sum(nums) / len(nums), False  # unknown aligner: mean
+
+
+def _reduce_series(
+    aligned: list[dict[str, Any]], reducer: str, group_by: list[str]
+) -> list[dict[str, Any]]:
+    groups: dict[tuple, list[dict[str, Any]]] = {}
+    for series in aligned:
+        key = tuple(_extract_field(series, field) for field in group_by)
+        groups.setdefault(key, []).append(series)
+
+    result: list[dict[str, Any]] = []
+    for members in groups.values():
+        by_end: dict[str, list[tuple[float, bool]]] = {}
+        for series in members:
+            for point in series.get("points", []):
+                value = _point_value(point)
+                end = point.get("interval", {}).get("end_time")
+                if value is not None and end is not None:
+                    by_end.setdefault(end, []).append(value)
+        points = [
+            _reduced_point(end, *_reduce_bucket(by_end[end], reducer))
+            for end in sorted(by_end, reverse=True)
+        ]
+        result.append(_grouped_series(members[0], group_by, points))
+    return result
+
+
+def _reduce_bucket(
+    values: list[tuple[float, bool]], reducer: str
+) -> tuple[float, bool]:
+    nums = [v for v, _ in values]
+    all_int = all(is_int for _, is_int in values)
+    if reducer == "REDUCE_MEAN":
+        return sum(nums) / len(nums), False
+    if reducer == "REDUCE_MIN":
+        return min(nums), all_int
+    if reducer == "REDUCE_MAX":
+        return max(nums), all_int
+    if reducer == "REDUCE_COUNT":
+        return float(len(nums)), True
+    return sum(nums), all_int  # REDUCE_SUM and default
+
+
+def _grouped_series(
+    sample: dict[str, Any], group_by: list[str], points: list[dict[str, Any]]
+) -> dict[str, Any]:
+    metric: dict[str, Any] = {"type": sample.get("metric", {}).get("type", "")}
+    resource: dict[str, Any] = {"type": sample.get("resource", {}).get("type", "")}
+    metric_labels, resource_labels = {}, {}
+    for field in group_by:
+        target, key = _label_target(field)
+        if target == "metric" and key:
+            value = sample.get("metric", {}).get("labels", {}).get(key)
+            if value is not None:
+                metric_labels[key] = value
+        elif target == "resource" and key:
+            value = sample.get("resource", {}).get("labels", {}).get(key)
+            if value is not None:
+                resource_labels[key] = value
+    if metric_labels:
+        metric["labels"] = metric_labels
+    if resource_labels:
+        resource["labels"] = resource_labels
+    return {"metric": metric, "resource": resource, "points": points}
+
+
+def _extract_field(series: dict[str, Any], field: str) -> Any:
+    if field == "resource.type":
+        return series.get("resource", {}).get("type")
+    if field == "metric.type":
+        return series.get("metric", {}).get("type")
+    target, key = _label_target(field)
+    if target and key:
+        return series.get(target, {}).get("labels", {}).get(key)
+    return None
+
+
+def _label_target(field: str) -> tuple[str | None, str | None]:
+    parts = field.split(".")
+    if (
+        len(parts) >= 3
+        and parts[0] in ("metric", "resource")
+        and parts[1]
+        in (
+            "label",
+            "labels",
+        )
+    ):
+        return parts[0], ".".join(parts[2:])
+    return None, None
+
+
+def _point_value(point: dict[str, Any]) -> tuple[float, bool] | None:
+    value = point.get("value", {})
+    if "double_value" in value:
+        return float(value["double_value"]), False
+    if "int64_value" in value:
+        return float(value["int64_value"]), True
+    if "bool_value" in value:
+        return (1.0 if value["bool_value"] else 0.0), True
+    return None
+
+
+def _make_point(
+    bucket_end: float, period: float, value: float, is_int: bool
+) -> dict[str, Any]:
+    return {
+        "interval": {
+            "start_time": _rfc3339(bucket_end - period),
+            "end_time": _rfc3339(bucket_end),
+        },
+        "value": _typed_value(value, is_int),
+    }
+
+
+def _reduced_point(end: str, value: float, is_int: bool) -> dict[str, Any]:
+    return {"interval": {"end_time": end}, "value": _typed_value(value, is_int)}
+
+
+def _typed_value(value: float, is_int: bool) -> dict[str, Any]:
+    if is_int:
+        return {"int64_value": int(round(value))}
+    return {"double_value": value}
+
+
+def _duration_seconds(duration: Any) -> float | None:
+    if not duration:
+        return None
+    text = str(duration)
+    if text.endswith("s"):
+        text = text[:-1]
+    try:
+        return float(text)
+    except ValueError:
+        return None
+
+
+def _rfc3339(epoch: float) -> str:
+    moment = datetime.fromtimestamp(epoch, tz=timezone.utc)
+    if moment.microsecond:
+        return moment.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    return moment.strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 #: Project-keyed backends, inspectable via ``get_backend("monitoring")[project]``.

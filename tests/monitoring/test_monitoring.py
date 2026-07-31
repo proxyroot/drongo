@@ -129,6 +129,81 @@ def test_list_time_series_filters_by_metric_type() -> None:
     assert [r.metric.type for r in results] == ["custom.googleapis.com/a"]
 
 
+def _write_point(client, metric_type, labels, seconds, value) -> None:
+    from google.cloud import monitoring_v3
+
+    series = monitoring_v3.TimeSeries()
+    series.metric.type = metric_type
+    series.resource.type = "global"
+    for key, val in labels.items():
+        series.resource.labels[key] = val
+    series.points = [
+        monitoring_v3.Point(
+            interval=monitoring_v3.TimeInterval(end_time={"seconds": seconds}),
+            value=monitoring_v3.TypedValue(double_value=value),
+        )
+    ]
+    client.create_time_series(name=PN, time_series=[series])
+
+
+def test_list_time_series_aligns_per_series() -> None:
+    from google.cloud import monitoring_v3
+
+    client = _metric_client()
+    now = 1_700_000_000
+    metric = "custom.googleapis.com/aligned"
+    _write_point(client, metric, {"zone": "us"}, now - 100, 10.0)
+    _write_point(client, metric, {"zone": "us"}, now - 250, 20.0)  # same 300s bucket
+
+    request = monitoring_v3.ListTimeSeriesRequest(
+        name=PN,
+        filter=f'metric.type = "{metric}"',
+        interval=monitoring_v3.TimeInterval(
+            start_time={"seconds": now - 600}, end_time={"seconds": now}
+        ),
+        view=monitoring_v3.ListTimeSeriesRequest.TimeSeriesView.FULL,
+        aggregation=monitoring_v3.Aggregation(
+            alignment_period={"seconds": 300},
+            per_series_aligner=monitoring_v3.Aggregation.Aligner.ALIGN_MEAN,
+        ),
+    )
+    (result,) = list(client.list_time_series(request=request))
+    # The two points fall in one 300s bucket: mean(10, 20) == 15.
+    assert result.points[0].value.double_value == 15.0
+
+
+def test_list_time_series_reduces_across_series() -> None:
+    from google.cloud import monitoring_v3
+
+    client = _metric_client()
+    now = 1_700_000_000
+    metric = "custom.googleapis.com/reduced"
+    # Two distinct series in zone "us" (different instance), one in "eu".
+    _write_point(client, metric, {"zone": "us", "instance": "a"}, now - 100, 15.0)
+    _write_point(client, metric, {"zone": "us", "instance": "b"}, now - 100, 30.0)
+    _write_point(client, metric, {"zone": "eu", "instance": "c"}, now - 100, 7.0)
+
+    request = monitoring_v3.ListTimeSeriesRequest(
+        name=PN,
+        filter=f'metric.type = "{metric}"',
+        interval=monitoring_v3.TimeInterval(
+            start_time={"seconds": now - 600}, end_time={"seconds": now}
+        ),
+        view=monitoring_v3.ListTimeSeriesRequest.TimeSeriesView.FULL,
+        aggregation=monitoring_v3.Aggregation(
+            alignment_period={"seconds": 300},
+            per_series_aligner=monitoring_v3.Aggregation.Aligner.ALIGN_MEAN,
+            cross_series_reducer=monitoring_v3.Aggregation.Reducer.REDUCE_SUM,
+            group_by_fields=["resource.label.zone"],
+        ),
+    )
+    results = list(client.list_time_series(request=request))
+    by_zone = {
+        r.resource.labels["zone"]: r.points[0].value.double_value for r in results
+    }
+    assert by_zone == {"us": 45.0, "eu": 7.0}
+
+
 # -- alert policies ---------------------------------------------------------
 
 

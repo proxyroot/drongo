@@ -26,7 +26,7 @@ Legend: ✅ available · 🚧 partial · ⬜ planned
 | Cloud Functions | forced REST (LRO) | 2nd-gen deploy/manage functions |
 | Memorystore (Redis) | forced REST (LRO) | instance admin |
 | Vertex AI | forced REST (LRO) | datasets, endpoints, models (deploy/predict), custom/batch jobs |
-| Cloud Monitoring | injected gRPC transport | metric descriptors, time series write/read, alert policies, notification channels |
+| Cloud Monitoring | injected gRPC transport | metric descriptors, time series write/read + aggregation, alert policies, notification channels |
 
 ## Available capabilities
 

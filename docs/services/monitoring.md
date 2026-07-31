@@ -59,8 +59,11 @@ def test_metrics():
 ```
 
 `list_time_series` filters the written points by `metric.type` / `resource.type`
-in the filter string and by the requested interval. Aggregation (alignment /
-reduction) is not applied - points are returned as written.
+in the filter string and by the requested interval. Passing an `aggregation`
+applies per-series alignment (mean / sum / min / max / count / rate / delta over
+the alignment period) and, when a `cross_series_reducer` and `group_by_fields`
+are set, reduction across the series in each group - over scalar values.
+Distribution values and MQL queries are not aggregated.
 
 ## Alert policies and notification channels
 
@@ -102,7 +105,8 @@ Missing resources raise `google.api_core.exceptions.NotFound`.
 | Metric descriptors: create / get / list / delete | Supported |
 | Time series: write (`create_time_series`) | Supported |
 | Time series: read (`list_time_series`, filter + interval) | Supported |
+| Time-series aggregation (alignment + cross-series reduction) | Supported |
 | Alert policies: create / get / list / update / delete | Supported |
 | Notification channels: create / get / list / update / delete | Supported |
-| Time-series aggregation (alignment / reduction), MQL query | Planned |
+| Distribution-value aggregation, MQL query (separate service) | Planned |
 | Uptime checks, SLOs, groups, snoozes | Planned |
