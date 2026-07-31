@@ -106,9 +106,11 @@ def test_predict():
     ).result()
 
     models = aiplatform_v1.ModelServiceClient(client_options=opts)
-    model = models.upload_model(
-        parent=parent, model=aiplatform_v1.Model(display_name="m")
-    ).result().model
+    model = (
+        models.upload_model(parent=parent, model=aiplatform_v1.Model(display_name="m"))
+        .result()
+        .model
+    )
     endpoints.deploy_model(
         endpoint=endpoint.name,
         deployed_model=aiplatform_v1.DeployedModel(model=model),
