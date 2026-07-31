@@ -51,9 +51,14 @@ Changelog = "https://github.com/proxyroot/drongo/releases"
 [project.optional-dependencies]
 # Optional: fake-data generators in `drongo.seed`.
 faker = ["faker>=20"]
+# Optional: run SQL queries against seeded BigQuery tables (client.query).
+bigquery = ["duckdb>=1.0", "sqlglot>=25", "pytz"]
 test = [
     "pytest>=7.4",
     "pytest-cov>=4.1",
+    "duckdb>=1.0",
+    "sqlglot>=25",
+    "pytz",
     "google-cloud-storage>=2.14",
     "google-cloud-secret-manager>=2.16",
     "google-cloud-pubsub>=2.18",

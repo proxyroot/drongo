@@ -1,9 +1,10 @@
 """In-memory models for Google BigQuery (REST/JSON API).
 
-Scoped to resource + data management, which is what is faithfully mockable at the
-wire level: datasets, tables, streaming inserts (``insertAll``), and reading rows
-back (``tabledata.list``). SQL query *execution* is intentionally out of scope
-(it would require a SQL engine); see the docs.
+Covers resource + data management (datasets, tables, streaming inserts via
+``insertAll``, reading rows back via ``tabledata.list``) and, when the optional
+``drongo[bigquery]`` extra is installed, SQL query *execution* against the seeded
+tables (see ``sql.py``). Completed query jobs are kept here so their results can
+be fetched back through ``getQueryResults``.
 """
 
 from __future__ import annotations
@@ -124,6 +125,7 @@ class BigQueryBackend(BaseBackend):
 
     def setup(self) -> None:
         self.datasets: dict[str, Dataset] = {}
+        self.jobs: dict[str, dict[str, Any]] = {}
 
     # -- datasets ----------------------------------------------------------
 
@@ -218,6 +220,33 @@ class BigQueryBackend(BaseBackend):
 
     def list_rows(self, dataset_id: str, table_id: str) -> list[dict[str, Any]]:
         return list(self.get_table(dataset_id, table_id).rows)
+
+    # -- query jobs --------------------------------------------------------
+
+    def save_query_job(
+        self,
+        job_id: str,
+        sql: str,
+        schema: list[dict[str, Any]],
+        rows: list[dict[str, Any]],
+        *,
+        location: str = "US",
+    ) -> dict[str, Any]:
+        job = {
+            "job_id": job_id,
+            "sql": sql,
+            "schema": schema,
+            "rows": rows,
+            "location": location,
+        }
+        self.jobs[job_id] = job
+        return job
+
+    def get_query_job(self, job_id: str) -> dict[str, Any]:
+        try:
+            return self.jobs[job_id]
+        except KeyError:
+            raise exceptions.not_found(f"Not found: Job {self.project}:{job_id}")
 
 
 #: Project-keyed backends, inspectable via ``get_backend("bigquery")[project]``.
