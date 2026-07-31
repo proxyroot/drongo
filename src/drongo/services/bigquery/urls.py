@@ -7,10 +7,17 @@ from drongo.services.bigquery.responses import BigQueryResponse
 _P = r"/bigquery/v2/projects/(?P<project>[^/]+)"
 _D = _P + r"/datasets/(?P<dataset>[^/]+)"
 _T = _D + r"/tables/(?P<table>[^/]+)"
+_J = _P + r"/jobs/(?P<job>[^/]+)"
+_Q = _P + r"/queries/(?P<job>[^/]+)"
 
 url_bases = [r"https?://bigquery\.googleapis\.com"]
 
 url_paths = {
+    # Query + jobs.
+    f"POST {_P}/jobs": BigQueryResponse.insert_job,
+    f"POST {_P}/queries": BigQueryResponse.query,
+    f"GET {_Q}": BigQueryResponse.get_query_results,
+    f"GET {_J}": BigQueryResponse.get_job,
     # Table data (most specific first).
     f"POST {_T}/insertAll": BigQueryResponse.insert_all,
     f"GET {_T}/data": BigQueryResponse.list_table_data,

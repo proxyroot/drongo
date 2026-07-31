@@ -13,7 +13,7 @@ Legend: ✅ available · 🚧 partial · ⬜ planned
 | Cloud Storage | REST interception | buckets, objects, uploads (simple/multipart/resumable), ranged downloads, list, copy/rewrite |
 | Secret Manager | forced REST | secrets, versions, access, enable/disable/destroy |
 | Pub/Sub | in-process gRPC emulator | topics, subscriptions, publish fan-out, pull/ack/nack, push handlers |
-| BigQuery | REST interception | datasets, tables, streaming inserts, read rows (no SQL engine) |
+| BigQuery | REST interception | datasets, tables, streaming inserts, read rows, SQL query execution (via `drongo[bigquery]`) |
 | Cloud Tasks | forced REST | queues, tasks, run/dispatch handlers, pause/resume/purge |
 | Cloud Run Jobs | forced REST (LRO) | jobs, executions, `run_job` handlers |
 | Resource Manager | forced REST (LRO) | projects CRUD, search, undelete |
@@ -76,9 +76,9 @@ Informed by moto's management plane and coverage tracking:
   instance `provisioning` → `running`) instead of completing instantly.
 - ⬜ **Deterministic resource-id seeding** — reproducible generated ids, the
   data-seeding counterpart drongo already has for field values.
-- 🚧 **Deepen existing services** — e.g. BigQuery query execution, Pub/Sub
-  streaming pull, Firestore transactions & real-time listeners, Cloud Tasks
-  retry semantics, Storage ACLs/IAM.
+- 🚧 **Deepen existing services** — e.g. Pub/Sub streaming pull, Firestore
+  transactions & real-time listeners, Cloud Tasks retry semantics, Storage
+  ACLs/IAM.
 
 ## Relationship to moto
 

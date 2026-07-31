@@ -1,13 +1,16 @@
-"""HTTP handlers implementing the BigQuery REST (v2) API (resource + data)."""
+"""HTTP handlers implementing the BigQuery REST (v2) API (resource + data + query)."""
 
 from __future__ import annotations
 
+import base64
 import json
+import uuid
 from datetime import datetime, timezone
 from typing import Any
 
 from drongo.core import exceptions
 from drongo.core.responses import BaseResponse, HttpResponse, Request, json_response
+from drongo.services.bigquery import sql
 from drongo.services.bigquery.models import BigQueryBackend, bigquery_backends
 
 
@@ -141,6 +144,117 @@ class BigQueryResponse(BaseResponse):
             }
         )
 
+    # -- query jobs --------------------------------------------------------
+
+    def insert_job(self, request: Request) -> HttpResponse:
+        """jobs.insert. Runs a query job to completion; ignores other job types."""
+        backend = self.backend_for(request)
+        body = request.json()
+        reference = body.get("jobReference") or {}
+        job_id = reference.get("jobId") or uuid.uuid4().hex
+        location = reference.get("location") or "US"
+        query_config = (body.get("configuration") or {}).get("query")
+        if query_config is not None:
+            schema, rows = sql.run_query(backend, query_config.get("query", ""))
+            backend.save_query_job(
+                job_id, query_config.get("query", ""), schema, rows, location=location
+            )
+        return json_response(
+            _job_resource(request.path_params["project"], job_id, body)
+        )
+
+    def get_job(self, request: Request) -> HttpResponse:
+        """jobs.get. Query jobs complete synchronously, so always DONE."""
+        backend = self.backend_for(request)
+        job = backend.get_query_job(request.path_params["job"])
+        return json_response(_completed_job(request.path_params["project"], job))
+
+    def get_query_results(self, request: Request) -> HttpResponse:
+        """jobs.getQueryResults: the schema + rows for a completed query job."""
+        backend = self.backend_for(request)
+        job = backend.get_query_job(request.path_params["job"])
+        return json_response(_query_results(request.path_params["project"], job))
+
+    def query(self, request: Request) -> HttpResponse:
+        """jobs.query: run a query and return its results in one call."""
+        backend = self.backend_for(request)
+        body = request.json()
+        query_text = body.get("query", "")
+        job_id = (body.get("jobReference") or {}).get("jobId") or uuid.uuid4().hex
+        location = body.get("location") or "US"
+        schema, rows = sql.run_query(backend, query_text)
+        job = backend.save_query_job(
+            job_id, query_text, schema, rows, location=location
+        )
+        return json_response(
+            _query_results(
+                request.path_params["project"], job, kind="bigquery#queryResponse"
+            )
+        )
+
+
+def _job_resource(project: str, job_id: str, body: dict[str, Any]) -> dict[str, Any]:
+    """A DONE job echoing back the submitted configuration (jobs.insert)."""
+    reference = body.get("jobReference") or {}
+    location = reference.get("location") or "US"
+    return {
+        "kind": "bigquery#job",
+        "etag": job_id,
+        "id": f"{project}:{location}.{job_id}",
+        "selfLink": (
+            f"https://bigquery.googleapis.com/bigquery/v2/projects/{project}"
+            f"/jobs/{job_id}"
+        ),
+        "jobReference": {"projectId": project, "jobId": job_id, "location": location},
+        "configuration": body.get("configuration") or {"jobType": "QUERY"},
+        "status": {"state": "DONE"},
+        "statistics": {"query": {"totalBytesProcessed": "0"}},
+    }
+
+
+def _completed_job(project: str, job: dict[str, Any]) -> dict[str, Any]:
+    """A DONE query job rebuilt from stored state (jobs.get)."""
+    return _job_resource(
+        project,
+        job["job_id"],
+        {
+            "jobReference": {"location": job["location"]},
+            "configuration": {
+                "jobType": "QUERY",
+                "query": {"query": job["sql"], "useLegacySql": False},
+            },
+        },
+    )
+
+
+def _query_results(
+    project: str, job: dict[str, Any], *, kind: str = "bigquery#getQueryResultsResponse"
+) -> dict[str, Any]:
+    schema, rows = job["schema"], job["rows"]
+    fv_rows = [
+        {"f": [{"v": _cell(row.get(f["name"]), f["type"])} for f in schema]}
+        for row in rows
+    ]
+    return {
+        "kind": kind,
+        "etag": job["job_id"],
+        "schema": {"fields": [_schema_field(f) for f in schema]},
+        "jobReference": {
+            "projectId": project,
+            "jobId": job["job_id"],
+            "location": job["location"],
+        },
+        "totalRows": str(len(rows)),
+        "rows": fv_rows,
+        "totalBytesProcessed": "0",
+        "jobComplete": True,
+        "cacheHit": False,
+    }
+
+
+def _schema_field(field: dict[str, Any]) -> dict[str, Any]:
+    return {"name": field["name"], "type": field["type"], "mode": "NULLABLE"}
+
 
 def _cell(value: Any, field_type: str | None = None) -> Any:
     """Render a value in BigQuery's ``{"v": ...}`` cell format (scalars only)."""
@@ -148,6 +262,8 @@ def _cell(value: Any, field_type: str | None = None) -> Any:
         return None
     if isinstance(value, bool):
         return "true" if value else "false"
+    if isinstance(value, bytes):
+        return base64.b64encode(value).decode("ascii")
     if isinstance(value, (list, dict)):
         return json.dumps(value)
     if field_type and field_type.upper() == "TIMESTAMP":

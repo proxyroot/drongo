@@ -66,7 +66,7 @@ per-project.
 | Create / get / list / delete table (with schema) | ✅ |
 | Streaming inserts (`insert_rows_json` / `insertAll`) | ✅ |
 | Read rows (`list_rows` / `tabledata.list`) | ✅ |
-| SQL query execution (`client.query(...)`) | ⬜ (needs a SQL engine) |
+| SQL query execution (`client.query(...)`) | ✅ (via `drongo[bigquery]`) |
 | Load/extract/copy jobs, routines, views | ⬜ |
 
 ## Cloud Tasks (`cloudtasks`)
