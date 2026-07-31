@@ -23,14 +23,6 @@ from drongo.core.backend import BackendDict, BaseBackend
 
 __all__ = ["PredictionHandler", "VertexAIBackend", "vertexai_backends"]
 
-_TYPE_PREFIX = "type.googleapis.com/google.cloud.aiplatform.v1."
-DATASET_TYPE = _TYPE_PREFIX + "Dataset"
-ENDPOINT_TYPE = _TYPE_PREFIX + "Endpoint"
-UPLOAD_MODEL_RESPONSE_TYPE = _TYPE_PREFIX + "UploadModelResponse"
-DEPLOY_MODEL_RESPONSE_TYPE = _TYPE_PREFIX + "DeployModelResponse"
-UNDEPLOY_MODEL_RESPONSE_TYPE = _TYPE_PREFIX + "UndeployModelResponse"
-EMPTY_TYPE = "type.googleapis.com/google.protobuf.Empty"
-
 #: A prediction handler receives ``(instances, parameters)`` and returns the list
 #: of predictions, so a test can run real prediction logic on a mocked endpoint.
 PredictionHandler = Callable[[list[Any], dict[str, Any]], list[Any]]

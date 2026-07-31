@@ -9,16 +9,16 @@ returned directly.
 from __future__ import annotations
 
 from drongo.core.responses import BaseResponse, HttpResponse, Request, json_response
-from drongo.services.vertexai.models import (
-    DATASET_TYPE,
-    DEPLOY_MODEL_RESPONSE_TYPE,
-    EMPTY_TYPE,
-    ENDPOINT_TYPE,
-    UNDEPLOY_MODEL_RESPONSE_TYPE,
-    UPLOAD_MODEL_RESPONSE_TYPE,
-    VertexAIBackend,
-    vertexai_backends,
-)
+from drongo.services.vertexai.models import VertexAIBackend, vertexai_backends
+
+# The ``@type`` URLs stamped on the Operation envelopes these handlers return.
+_TYPE_PREFIX = "type.googleapis.com/google.cloud.aiplatform.v1."
+DATASET_TYPE = _TYPE_PREFIX + "Dataset"
+ENDPOINT_TYPE = _TYPE_PREFIX + "Endpoint"
+UPLOAD_MODEL_RESPONSE_TYPE = _TYPE_PREFIX + "UploadModelResponse"
+DEPLOY_MODEL_RESPONSE_TYPE = _TYPE_PREFIX + "DeployModelResponse"
+UNDEPLOY_MODEL_RESPONSE_TYPE = _TYPE_PREFIX + "UndeployModelResponse"
+EMPTY_TYPE = "type.googleapis.com/google.protobuf.Empty"
 
 
 class VertexAIResponse(BaseResponse):
