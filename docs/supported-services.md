@@ -229,9 +229,25 @@ normal client with no `transport` argument. Scoped to instance administration.
 | Failover / export / import / upgrade | ⬜ |
 | Redis data plane | ⬜ (use a real Redis) |
 
+## Datastore (`datastore`)
+
+Client: `google-cloud-datastore` (`datastore.Client`) · Transport: gRPC (default),
+served by an in-process gRPC emulator via `DATASTORE_EMULATOR_HOST` · Backend:
+per-project. Use the normal client with no `transport` argument.
+
+| Operation | Status |
+| --- | --- |
+| put / get / delete (`Commit` / `Lookup`) | ✅ |
+| Named + auto-id keys (`AllocateIds`) | ✅ |
+| Typed values (str/int/float/bool/null/bytes/array/timestamp/key) | ✅ |
+| Queries: kind, filters, order, limit, offset | ✅ |
+| Composite `AND`/`OR`, `IN`/`NOT_IN` | ✅ |
+| Transactions (accepted, completed synchronously) | ✅ |
+| Ancestor queries, projections, cursors, aggregation | ⬜ |
+
 ## Planned
 
-Datastore mode · Cloud Spanner · Firestore transactions & listeners · IAM roles
+Cloud Spanner · Cloud Bigtable · Firestore transactions & listeners · IAM roles
 & policies · KMS key versions. See the
 [roadmap](https://drongo.proxyroot.com/roadmap/) and
 [open a service request](https://github.com/proxyroot/drongo/issues/new/choose).
