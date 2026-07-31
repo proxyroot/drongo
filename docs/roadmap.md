@@ -27,6 +27,7 @@ Legend: ✅ available · 🚧 partial · ⬜ planned
 | Memorystore (Redis) | forced REST (LRO) | instance admin |
 | Vertex AI | forced REST (LRO) | datasets, endpoints, models (deploy/predict), custom/batch jobs |
 | Cloud Monitoring | injected gRPC transport | metrics + aggregation, alert policies, notification channels, uptime checks, groups, snoozes, services/SLOs |
+| Document AI | forced REST (LRO) | processors (CRUD + enable/disable), process document (handler), batch process, processor types |
 
 ## Available capabilities
 
@@ -45,7 +46,6 @@ These are the next services to build, ahead of the tiers below.
 
 | Service | Client | Notes |
 | --- | --- | --- |
-| Document AI | `google-cloud-documentai` | processors, process / batch-process documents |
 | Artifact Registry | `google-cloud-artifact-registry` | repositories, packages, versions, tags |
 | Storage Transfer | `google-cloud-storage-transfer` | transfer jobs and operations (control plane) |
 
