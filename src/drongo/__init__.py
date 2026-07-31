@@ -40,6 +40,7 @@ _SERVICE_MODULES = frozenset(
         "cloudscheduler",
         "cloudtasks",
         "datastore",
+        "documentai",
         "firestore",
         "iam",
         "kms",

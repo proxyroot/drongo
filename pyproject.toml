@@ -77,6 +77,7 @@ test = [
     "google-cloud-bigtable>=2.21",
     "google-cloud-aiplatform>=1.40",
     "google-cloud-monitoring>=2.15",
+    "google-cloud-documentai>=2.20",
     "gcloud-aio-pubsub>=6",
     "pytest-asyncio>=0.23",
     "faker>=20",
