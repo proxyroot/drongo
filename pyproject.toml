@@ -68,6 +68,7 @@ test = [
     "google-cloud-scheduler>=2.11",
     "google-cloud-functions>=1.13",
     "google-cloud-redis>=2.13",
+    "google-cloud-datastore>=2.15",
     "faker>=20",
 ]
 dev = [
