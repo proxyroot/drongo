@@ -264,7 +264,10 @@ per-project. Use the normal client with `admin=True`.
 
 ## Planned
 
-Cloud Spanner · Firestore transactions & listeners · IAM roles & policies · KMS
-key versions · Bigtable read filters. See the
+Next up (prioritized): Vertex AI / AI Platform · Cloud Monitoring · Document AI ·
+Artifact Registry · Storage Transfer.
+
+Also planned: Cloud Spanner · Firestore transactions & listeners · IAM roles &
+policies · KMS key versions · Bigtable read filters. See the
 [roadmap](https://drongo.proxyroot.com/roadmap/) and
 [open a service request](https://github.com/proxyroot/drongo/issues/new/choose).
