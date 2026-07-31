@@ -293,11 +293,11 @@ Backend: per-project. Use the normal clients with no `transport` argument.
 | Metric descriptors: create / get / list / delete | ✅ |
 | Time series: write (`create_time_series`) | ✅ |
 | Time series: read (`list_time_series`, filter + interval) | ✅ |
-| Aggregation (alignment + cross-series reduction) | ✅ |
+| Aggregation (scalar align/reduce + distribution merge/percentile) | ✅ |
 | Alert policies: create / get / list / update / delete | ✅ |
 | Notification channels: create / get / list / update / delete | ✅ |
-| Distribution-value aggregation, MQL query (separate service) | ⬜ |
-| Uptime checks, SLOs, groups, snoozes | ⬜ |
+| Uptime checks, groups, snoozes, services + SLOs | ✅ |
+| MQL query (separate `QueryService`) | ⬜ |
 
 ## Planned
 

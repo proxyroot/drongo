@@ -32,6 +32,9 @@ class MonitoringBackend(BaseBackend):
         self.time_series: list[dict[str, Any]] = []
         self.alert_policies: dict[str, dict[str, Any]] = {}
         self.notification_channels: dict[str, dict[str, Any]] = {}
+        #: Uptime configs, groups, snoozes, services and SLOs share one
+        #: name-keyed store; the collection segment keeps them apart.
+        self.resources: dict[str, dict[str, Any]] = {}
         self._series_index: dict[tuple, dict[str, Any]] = {}
         self._counter = 0
 
@@ -176,6 +179,43 @@ class MonitoringBackend(BaseBackend):
         _apply_update(stored, channel, paths)
         return stored
 
+    # -- generic resources (uptime configs, groups, snoozes, services, SLOs)
+
+    def create_resource(
+        self, parent: str, collection: str, resource: dict[str, Any]
+    ) -> dict[str, Any]:
+        name = f"{parent}/{collection}/{self._next()}"
+        resource = dict(resource)
+        resource["name"] = name
+        self.resources[name] = resource
+        return resource
+
+    def get_resource(self, name: str) -> dict[str, Any]:
+        try:
+            return self.resources[name]
+        except KeyError:
+            raise exceptions.not_found(f"Not found: {name}")
+
+    def list_resources(self, parent: str, collection: str) -> list[dict[str, Any]]:
+        prefix = f"{parent}/{collection}/"
+        return [
+            self.resources[n]
+            for n in sorted(self.resources)
+            if n.startswith(prefix) and "/" not in n[len(prefix) :]
+        ]
+
+    def delete_resource(self, name: str) -> None:
+        if name not in self.resources:
+            raise exceptions.not_found(f"Not found: {name}")
+        del self.resources[name]
+
+    def update_resource(
+        self, resource: dict[str, Any], paths: list[str]
+    ) -> dict[str, Any]:
+        stored = self.get_resource(resource.get("name", ""))
+        _apply_update(stored, resource, paths)
+        return stored
+
 
 def _identity(series: dict[str, Any]) -> tuple:
     """The (metric, resource) identity that uniquely names a time series."""
@@ -230,8 +270,12 @@ def _epoch(rfc3339: str | None) -> float | None:
 #
 # A subset of Cloud Monitoring's aggregation: per-series alignment into
 # fixed-width buckets, then optional cross-series reduction grouped by label
-# fields. Scalar values only (double / int64 / bool); distributions pass through
-# unaggregated. RATE/DELTA are approximated (sum over the period, or sum/period).
+# fields. Scalar values (double / int64 / bool) are combined arithmetically;
+# distribution values are merged histogram-wise, and a percentile aligner /
+# reducer reads a value off the (merged) distribution. RATE/DELTA are
+# approximated (sum over the period, or sum/period).
+
+_PERCENTILES = {"05": 5.0, "50": 50.0, "95": 95.0, "99": 99.0}
 
 
 def _aggregate(
@@ -252,19 +296,20 @@ def _align_series(
 ) -> dict[str, Any]:
     if aligner in ("", "ALIGN_NONE") or not period:
         return series
-    buckets: dict[float, list[tuple[float, bool]]] = {}
+    buckets: dict[float, list[dict[str, Any]]] = {}
     for point in series.get("points", []):
-        value = _point_value(point)
         moment = _epoch(point.get("interval", {}).get("end_time"))
-        if value is None or moment is None:
+        if moment is None:
             continue
         base = anchor if anchor is not None else moment
         index = int((base - moment) // period)
         bucket_end = base - index * period
-        buckets.setdefault(bucket_end, []).append(value)
+        buckets.setdefault(bucket_end, []).append(point)
     points = [
-        _make_point(
-            bucket_end, period, *_align_bucket(buckets[bucket_end], aligner, period)
+        _point_at(
+            bucket_end - period,
+            bucket_end,
+            _combine(buckets[bucket_end], aligner, period),
         )
         for bucket_end in sorted(buckets, reverse=True)
     ]
@@ -273,26 +318,6 @@ def _align_series(
         "resource": series.get("resource", {}),
         "points": points,
     }
-
-
-def _align_bucket(
-    values: list[tuple[float, bool]], aligner: str, period: float
-) -> tuple[float, bool]:
-    nums = [v for v, _ in values]
-    all_int = all(is_int for _, is_int in values)
-    if aligner == "ALIGN_MEAN":
-        return sum(nums) / len(nums), False
-    if aligner in ("ALIGN_SUM", "ALIGN_DELTA"):
-        return sum(nums), all_int
-    if aligner == "ALIGN_MIN":
-        return min(nums), all_int
-    if aligner == "ALIGN_MAX":
-        return max(nums), all_int
-    if aligner == "ALIGN_COUNT":
-        return float(len(nums)), True
-    if aligner == "ALIGN_RATE":
-        return sum(nums) / period, False
-    return sum(nums) / len(nums), False  # unknown aligner: mean
 
 
 def _reduce_series(
@@ -305,35 +330,51 @@ def _reduce_series(
 
     result: list[dict[str, Any]] = []
     for members in groups.values():
-        by_end: dict[str, list[tuple[float, bool]]] = {}
+        by_end: dict[str, list[dict[str, Any]]] = {}
         for series in members:
             for point in series.get("points", []):
-                value = _point_value(point)
                 end = point.get("interval", {}).get("end_time")
-                if value is not None and end is not None:
-                    by_end.setdefault(end, []).append(value)
+                if end is not None:
+                    by_end.setdefault(end, []).append(point)
         points = [
-            _reduced_point(end, *_reduce_bucket(by_end[end], reducer))
+            _point_at(None, end, _combine(by_end[end], reducer, None))
             for end in sorted(by_end, reverse=True)
         ]
         result.append(_grouped_series(members[0], group_by, points))
     return result
 
 
-def _reduce_bucket(
-    values: list[tuple[float, bool]], reducer: str
-) -> tuple[float, bool]:
+def _combine(
+    points: list[dict[str, Any]], op: str, period: float | None
+) -> dict[str, Any]:
+    """Combine a bucket of points with an aligner/reducer into one TypedValue."""
+    percentile = _percentile_target(op)
+    dists = [d for p in points if (d := _distribution(p)) is not None]
+    if dists:
+        merged = _merge_distributions(dists)
+        if percentile is not None:
+            return {"double_value": _distribution_percentile(merged, percentile)}
+        return {"distribution_value": merged}
+    values = [v for p in points if (v := _scalar(p)) is not None]
+    if not values:
+        return {"double_value": 0.0}
     nums = [v for v, _ in values]
     all_int = all(is_int for _, is_int in values)
-    if reducer == "REDUCE_MEAN":
-        return sum(nums) / len(nums), False
-    if reducer == "REDUCE_MIN":
-        return min(nums), all_int
-    if reducer == "REDUCE_MAX":
-        return max(nums), all_int
-    if reducer == "REDUCE_COUNT":
-        return float(len(nums)), True
-    return sum(nums), all_int  # REDUCE_SUM and default
+    if percentile is not None:
+        return {"double_value": _quantile(nums, percentile)}
+    if op.endswith("_MEAN"):
+        return {"double_value": sum(nums) / len(nums)}
+    if op.endswith("_MIN"):
+        return _typed_value(min(nums), all_int)
+    if op.endswith("_MAX"):
+        return _typed_value(max(nums), all_int)
+    if op.endswith("_COUNT"):
+        return {"int64_value": len(nums)}
+    if op == "ALIGN_RATE" and period:
+        return {"double_value": sum(nums) / period}
+    if op in ("ALIGN_SUM", "ALIGN_DELTA", "REDUCE_SUM"):
+        return _typed_value(sum(nums), all_int)
+    return {"double_value": sum(nums) / len(nums)}  # unknown op: mean
 
 
 def _grouped_series(
@@ -385,7 +426,7 @@ def _label_target(field: str) -> tuple[str | None, str | None]:
     return None, None
 
 
-def _point_value(point: dict[str, Any]) -> tuple[float, bool] | None:
+def _scalar(point: dict[str, Any]) -> tuple[float, bool] | None:
     value = point.get("value", {})
     if "double_value" in value:
         return float(value["double_value"]), False
@@ -396,26 +437,113 @@ def _point_value(point: dict[str, Any]) -> tuple[float, bool] | None:
     return None
 
 
-def _make_point(
-    bucket_end: float, period: float, value: float, is_int: bool
+def _distribution(point: dict[str, Any]) -> dict[str, Any] | None:
+    return point.get("value", {}).get("distribution_value")
+
+
+def _point_at(
+    start: float | None, end: float | str, value: dict[str, Any]
 ) -> dict[str, Any]:
-    return {
-        "interval": {
-            "start_time": _rfc3339(bucket_end - period),
-            "end_time": _rfc3339(bucket_end),
-        },
-        "value": _typed_value(value, is_int),
-    }
-
-
-def _reduced_point(end: str, value: float, is_int: bool) -> dict[str, Any]:
-    return {"interval": {"end_time": end}, "value": _typed_value(value, is_int)}
+    interval = {"end_time": _rfc3339(end) if isinstance(end, (int, float)) else end}
+    if start is not None:
+        interval["start_time"] = _rfc3339(start)
+    return {"interval": interval, "value": value}
 
 
 def _typed_value(value: float, is_int: bool) -> dict[str, Any]:
     if is_int:
         return {"int64_value": int(round(value))}
     return {"double_value": value}
+
+
+def _percentile_target(op: str) -> float | None:
+    for suffix, pct in _PERCENTILES.items():
+        if op.endswith("PERCENTILE_" + suffix):
+            return pct
+    return None
+
+
+def _quantile(nums: list[float], pct: float) -> float:
+    ordered = sorted(nums)
+    if not ordered:
+        return 0.0
+    rank = (pct / 100.0) * (len(ordered) - 1)
+    low = int(rank)
+    high = min(low + 1, len(ordered) - 1)
+    return ordered[low] + (ordered[high] - ordered[low]) * (rank - low)
+
+
+def _merge_distributions(dists: list[dict[str, Any]]) -> dict[str, Any]:
+    """Combine histograms: add counts and bucket_counts, pool mean and deviation."""
+    total = sum(int(d.get("count", 0) or 0) for d in dists)
+    mean = (
+        sum(int(d.get("count", 0) or 0) * float(d.get("mean", 0.0)) for d in dists)
+        / total
+        if total
+        else 0.0
+    )
+    deviation = 0.0
+    bucket_counts: list[int] = []
+    for dist in dists:
+        count = int(dist.get("count", 0) or 0)
+        deviation += float(dist.get("sum_of_squared_deviation", 0.0))
+        deviation += count * (float(dist.get("mean", 0.0)) - mean) ** 2
+        for index, raw in enumerate(dist.get("bucket_counts", [])):
+            if index < len(bucket_counts):
+                bucket_counts[index] += int(raw)
+            else:
+                bucket_counts.append(int(raw))
+    merged: dict[str, Any] = {
+        "count": total,
+        "mean": mean,
+        "sum_of_squared_deviation": deviation,
+        "bucket_counts": bucket_counts,
+    }
+    options = next(
+        (d.get("bucket_options") for d in dists if d.get("bucket_options")), None
+    )
+    if options:
+        merged["bucket_options"] = options
+    return merged
+
+
+def _distribution_percentile(dist: dict[str, Any], pct: float) -> float:
+    counts = [int(c) for c in dist.get("bucket_counts", [])]
+    total = sum(counts)
+    if total == 0:
+        return float(dist.get("mean", 0.0))
+    bounds = _bucket_bounds(dist.get("bucket_options", {}), len(counts))
+    target = pct / 100.0 * total
+    cumulative = 0
+    for index, count in enumerate(counts):
+        cumulative += count
+        if cumulative >= target:
+            lower = (
+                bounds[index - 1]
+                if 0 < index <= len(bounds)
+                else (bounds[0] if bounds else 0.0)
+            )
+            upper = bounds[index] if index < len(bounds) else lower
+            return (lower + upper) / 2.0
+    return bounds[-1] if bounds else float(dist.get("mean", 0.0))
+
+
+def _bucket_bounds(options: dict[str, Any], count: int) -> list[float]:
+    if "explicit_buckets" in options:
+        return [float(b) for b in options["explicit_buckets"].get("bounds", [])]
+    if "linear_buckets" in options:
+        linear = options["linear_buckets"]
+        num = int(linear.get("num_finite_buckets", 0))
+        width = float(linear.get("width", 0.0))
+        offset = float(linear.get("offset", 0.0))
+        return [offset + width * i for i in range(num + 1)]
+    if "exponential_buckets" in options:
+        exp = options["exponential_buckets"]
+        num = int(exp.get("num_finite_buckets", 0))
+        growth = float(exp.get("growth_factor", 1.0))
+        scale = float(exp.get("scale", 1.0))
+        return [scale * growth**i for i in range(num + 1)]
+    return []
 
 
 def _duration_seconds(duration: Any) -> float | None:

@@ -208,11 +208,120 @@ class MonitoringEmulator(BaseEmulator):
                 self._update_notification_channel,
             ),
         }
+
+        # Uptime configs, groups, snoozes, services and SLOs are uniform CRUD, so
+        # they are built from a config table over generic handlers.
+        def make_create(collection: str, field: str, rtype: Any) -> Any:
+            def handler(request: Any, context: Any) -> Any:
+                req = self._dict(request)
+                parent = str(req.get("parent") or req.get("name") or "")
+                created = self._backend(parent).create_resource(
+                    parent, collection, req.get(field, {})
+                )
+                return rtype(created)
+
+            return handler
+
+        def make_get(rtype: Any) -> Any:
+            def handler(request: Any, context: Any) -> Any:
+                req = self._dict(request)
+                return rtype(self._backend(req["name"]).get_resource(req["name"]))
+
+            return handler
+
+        def make_list(collection: str, list_field: str, rtype: Any) -> Any:
+            def handler(request: Any, context: Any) -> Any:
+                req = self._dict(request)
+                parent = str(req.get("parent") or req.get("name") or "")
+                items = self._backend(parent).list_resources(parent, collection)
+                return rtype({list_field: items})
+
+            return handler
+
+        def make_update(field: str, rtype: Any) -> Any:
+            def handler(request: Any, context: Any) -> Any:
+                req = self._dict(request)
+                resource = req.get(field, {})
+                updated = self._backend(resource["name"]).update_resource(
+                    resource, _mask_paths(req.get("update_mask"))
+                )
+                return rtype(updated)
+
+            return handler
+
+        def make_delete() -> Any:
+            def handler(request: Any, context: Any) -> Any:
+                req = self._dict(request)
+                self._backend(req["name"]).delete_resource(req["name"])
+                return empty.Empty()
+
+            return handler
+
+        def crud(config: tuple) -> dict[str, Any]:
+            collection, field, list_field, singular, plural, has_delete = config
+            rtype = getattr(mt, singular)
+            list_resp = getattr(mt, f"List{plural}Response")
+            handlers = {
+                f"Create{singular}": unary(
+                    getattr(mt, f"Create{singular}Request"),
+                    rtype,
+                    make_create(collection, field, rtype),
+                ),
+                f"Get{singular}": unary(
+                    getattr(mt, f"Get{singular}Request"), rtype, make_get(rtype)
+                ),
+                f"List{plural}": unary(
+                    getattr(mt, f"List{plural}Request"),
+                    list_resp,
+                    make_list(collection, list_field, list_resp),
+                ),
+                f"Update{singular}": unary(
+                    getattr(mt, f"Update{singular}Request"),
+                    rtype,
+                    make_update(field, rtype),
+                ),
+            }
+            if has_delete:
+                handlers[f"Delete{singular}"] = unary(
+                    getattr(mt, f"Delete{singular}Request"), empty.Empty, make_delete()
+                )
+            return handlers
+
+        uptime = crud(
+            (
+                "uptimeCheckConfigs",
+                "uptime_check_config",
+                "uptime_check_configs",
+                "UptimeCheckConfig",
+                "UptimeCheckConfigs",
+                True,
+            )
+        )
+        group = crud(("groups", "group", "group", "Group", "Groups", True))
+        snooze = crud(("snoozes", "snooze", "snoozes", "Snooze", "Snoozes", False))
+        service = crud(("services", "service", "services", "Service", "Services", True))
+        slo = crud(
+            (
+                "serviceLevelObjectives",
+                "service_level_objective",
+                "service_level_objectives",
+                "ServiceLevelObjective",
+                "ServiceLevelObjectives",
+                True,
+            )
+        )
+
         generic = grpc.method_handlers_generic_handler
         return (
             generic("google.monitoring.v3.MetricService", metric),
             generic("google.monitoring.v3.AlertPolicyService", alert),
             generic("google.monitoring.v3.NotificationChannelService", channel),
+            generic("google.monitoring.v3.UptimeCheckService", uptime),
+            generic("google.monitoring.v3.GroupService", group),
+            generic("google.monitoring.v3.SnoozeService", snooze),
+            generic(
+                "google.monitoring.v3.ServiceMonitoringService", {**service, **slo}
+            ),
         )
 
     def _backend(self, name: str) -> MonitoringBackend:

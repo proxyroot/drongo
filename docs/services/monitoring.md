@@ -7,8 +7,9 @@
 - **Backend:** per-project.
 
 Use the normal clients with no `transport` argument. Covers **metrics** (metric
-descriptors + time series) and **alerting** (alert policies + notification
-channels).
+descriptors + time series, with aggregation), **alerting** (alert policies +
+notification channels), and the **uptime check**, **group**, **snooze** and
+**service/SLO** clients.
 
 ## Metric descriptors and time series
 
@@ -60,10 +61,39 @@ def test_metrics():
 
 `list_time_series` filters the written points by `metric.type` / `resource.type`
 in the filter string and by the requested interval. Passing an `aggregation`
-applies per-series alignment (mean / sum / min / max / count / rate / delta over
-the alignment period) and, when a `cross_series_reducer` and `group_by_fields`
-are set, reduction across the series in each group - over scalar values.
-Distribution values and MQL queries are not aggregated.
+applies per-series alignment (mean / sum / min / max / count / rate / delta /
+percentile over the alignment period) and, when a `cross_series_reducer` and
+`group_by_fields` are set, reduction across the series in each group. Scalar
+values are combined arithmetically; distribution values are merged histogram-wise
+(and a percentile aligner reads a value off the merged distribution).
+
+Beyond metrics and alerting, the uptime check, group, snooze and
+service/SLO (`ServiceMonitoring`) clients work too:
+
+```python
+@mock_gcp
+def test_uptime_and_slo():
+    from google.cloud import monitoring_v3
+
+    project = "projects/my-project"
+
+    uptime = monitoring_v3.UptimeCheckServiceClient()
+    uptime.create_uptime_check_config(
+        parent=project,
+        uptime_check_config=monitoring_v3.UptimeCheckConfig(display_name="ping"),
+    )
+
+    services = monitoring_v3.ServiceMonitoringServiceClient()
+    service = services.create_service(
+        parent=project, service=monitoring_v3.Service(display_name="checkout")
+    )
+    services.create_service_level_objective(
+        parent=service.name,
+        service_level_objective=monitoring_v3.ServiceLevelObjective(
+            display_name="99.9", goal=0.999
+        ),
+    )
+```
 
 ## Alert policies and notification channels
 
@@ -105,8 +135,12 @@ Missing resources raise `google.api_core.exceptions.NotFound`.
 | Metric descriptors: create / get / list / delete | Supported |
 | Time series: write (`create_time_series`) | Supported |
 | Time series: read (`list_time_series`, filter + interval) | Supported |
-| Time-series aggregation (alignment + cross-series reduction) | Supported |
+| Aggregation: scalar alignment + cross-series reduction | Supported |
+| Aggregation: distribution merge + percentile | Supported |
 | Alert policies: create / get / list / update / delete | Supported |
 | Notification channels: create / get / list / update / delete | Supported |
-| Distribution-value aggregation, MQL query (separate service) | Planned |
-| Uptime checks, SLOs, groups, snoozes | Planned |
+| Uptime check configs: create / get / list / update / delete | Supported |
+| Groups: create / get / list / update / delete | Supported |
+| Snoozes: create / get / list / update | Supported |
+| Services + SLOs: create / get / list / update / delete | Supported |
+| MQL query (separate `QueryService`) | Planned |

@@ -204,6 +204,79 @@ def test_list_time_series_reduces_across_series() -> None:
     assert by_zone == {"us": 45.0, "eu": 7.0}
 
 
+def test_distribution_aggregation_merges_and_percentile() -> None:
+    from google.api import distribution_pb2
+    from google.cloud import monitoring_v3
+
+    client = _metric_client()
+    now = 1_700_000_000
+
+    def distribution(count, mean, bucket_counts):
+        return distribution_pb2.Distribution(
+            count=count,
+            mean=mean,
+            bucket_options=distribution_pb2.Distribution.BucketOptions(
+                explicit_buckets=distribution_pb2.Distribution.BucketOptions.Explicit(
+                    bounds=[1.0, 5.0]
+                )
+            ),
+            bucket_counts=bucket_counts,
+        )
+
+    series = monitoring_v3.TimeSeries()
+    series.metric.type = "custom.googleapis.com/latency"
+    series.resource.type = "global"
+    series.points = [
+        monitoring_v3.Point(
+            interval=monitoring_v3.TimeInterval(end_time={"seconds": now - 100}),
+            value=monitoring_v3.TypedValue(
+                distribution_value=distribution(2, 3.0, [0, 2, 0])
+            ),
+        ),
+        monitoring_v3.Point(
+            interval=monitoring_v3.TimeInterval(end_time={"seconds": now - 200}),
+            value=monitoring_v3.TypedValue(
+                distribution_value=distribution(3, 6.0, [0, 1, 2])
+            ),
+        ),
+    ]
+    client.create_time_series(name=PN, time_series=[series])
+
+    interval = monitoring_v3.TimeInterval(
+        start_time={"seconds": now - 300}, end_time={"seconds": now}
+    )
+    base = {
+        "name": PN,
+        "filter": 'metric.type = "custom.googleapis.com/latency"',
+        "interval": interval,
+        "view": monitoring_v3.ListTimeSeriesRequest.TimeSeriesView.FULL,
+    }
+
+    # ALIGN_DELTA merges the two histograms in the bucket.
+    merged = monitoring_v3.ListTimeSeriesRequest(
+        aggregation=monitoring_v3.Aggregation(
+            alignment_period={"seconds": 300},
+            per_series_aligner=monitoring_v3.Aggregation.Aligner.ALIGN_DELTA,
+        ),
+        **base,
+    )
+    (result,) = list(client.list_time_series(request=merged))
+    dist = result.points[0].value.distribution_value
+    assert dist.count == 5
+    assert list(dist.bucket_counts) == [0, 3, 2]
+
+    # A percentile aligner reads a scalar off the merged distribution.
+    percentile = monitoring_v3.ListTimeSeriesRequest(
+        aggregation=monitoring_v3.Aggregation(
+            alignment_period={"seconds": 300},
+            per_series_aligner=monitoring_v3.Aggregation.Aligner.ALIGN_PERCENTILE_50,
+        ),
+        **base,
+    )
+    (result,) = list(client.list_time_series(request=percentile))
+    assert result.points[0].value.double_value == 3.0
+
+
 # -- alert policies ---------------------------------------------------------
 
 
@@ -259,3 +332,91 @@ def test_notification_channel_crud() -> None:
 
     client.delete_notification_channel(name=channel.name)
     assert list(client.list_notification_channels(name=PN)) == []
+
+
+# -- uptime / groups / snoozes / services + SLOs ----------------------------
+
+
+def test_uptime_check_config_crud() -> None:
+    from google.cloud import monitoring_v3
+
+    client = monitoring_v3.UptimeCheckServiceClient()
+    config = client.create_uptime_check_config(
+        parent=PN,
+        uptime_check_config=monitoring_v3.UptimeCheckConfig(display_name="ping"),
+    )
+    assert config.name.startswith(f"{PN}/uptimeCheckConfigs/")
+    assert client.get_uptime_check_config(name=config.name).display_name == "ping"
+
+    config.display_name = "ping-v2"
+    updated = client.update_uptime_check_config(uptime_check_config=config)
+    assert updated.display_name == "ping-v2"
+
+    assert [c.display_name for c in client.list_uptime_check_configs(parent=PN)] == [
+        "ping-v2"
+    ]
+    client.delete_uptime_check_config(name=config.name)
+    assert list(client.list_uptime_check_configs(parent=PN)) == []
+
+
+def test_group_crud() -> None:
+    from google.cloud import monitoring_v3
+
+    client = monitoring_v3.GroupServiceClient()
+    group = client.create_group(
+        name=PN,
+        group=monitoring_v3.Group(
+            display_name="prod", filter='resource.type = "gce_instance"'
+        ),
+    )
+    assert group.name.startswith(f"{PN}/groups/")
+    assert client.get_group(name=group.name).display_name == "prod"
+    assert [g.display_name for g in client.list_groups(name=PN)] == ["prod"]
+
+    client.delete_group(name=group.name)
+    assert list(client.list_groups(name=PN)) == []
+
+
+def test_snooze_create_list() -> None:
+    from google.cloud import monitoring_v3
+
+    client = monitoring_v3.SnoozeServiceClient()
+    snooze = client.create_snooze(
+        parent=PN,
+        snooze=monitoring_v3.Snooze(
+            display_name="quiet",
+            criteria=monitoring_v3.Snooze.Criteria(policies=[f"{PN}/alertPolicies/1"]),
+            interval=monitoring_v3.TimeInterval(
+                start_time={"seconds": 100}, end_time={"seconds": 200}
+            ),
+        ),
+    )
+    assert snooze.name.startswith(f"{PN}/snoozes/")
+    assert client.get_snooze(name=snooze.name).display_name == "quiet"
+    assert [s.display_name for s in client.list_snoozes(parent=PN)] == ["quiet"]
+
+
+def test_service_and_slo_crud() -> None:
+    from google.cloud import monitoring_v3
+
+    client = monitoring_v3.ServiceMonitoringServiceClient()
+    service = client.create_service(
+        parent=PN, service=monitoring_v3.Service(display_name="checkout")
+    )
+    assert service.name.startswith(f"{PN}/services/")
+
+    slo = client.create_service_level_objective(
+        parent=service.name,
+        service_level_objective=monitoring_v3.ServiceLevelObjective(
+            display_name="99.9", goal=0.999
+        ),
+    )
+    assert slo.name.startswith(f"{service.name}/serviceLevelObjectives/")
+    assert client.get_service_level_objective(name=slo.name).goal == 0.999
+    assert [
+        s.display_name
+        for s in client.list_service_level_objectives(parent=service.name)
+    ] == ["99.9"]
+
+    # Listing services must not leak the nested SLO resource names.
+    assert [s.display_name for s in client.list_services(parent=PN)] == ["checkout"]

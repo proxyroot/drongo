@@ -29,6 +29,10 @@ def _patchers() -> list[Any]:
             ("google.cloud.monitoring_v3", "MetricServiceClient"),
             ("google.cloud.monitoring_v3", "AlertPolicyServiceClient"),
             ("google.cloud.monitoring_v3", "NotificationChannelServiceClient"),
+            ("google.cloud.monitoring_v3", "UptimeCheckServiceClient"),
+            ("google.cloud.monitoring_v3", "GroupServiceClient"),
+            ("google.cloud.monitoring_v3", "SnoozeServiceClient"),
+            ("google.cloud.monitoring_v3", "ServiceMonitoringServiceClient"),
         ],
     )
 
