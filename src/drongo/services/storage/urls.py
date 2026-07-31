@@ -19,6 +19,28 @@ url_paths = {
     r"GET /download/storage/v1/b/(?P<bucket>[^/]+)/o/(?P<object>[^/]+)": (
         StorageResponse.download_object
     ),
+    # HMAC keys (project-scoped).
+    r"POST /storage/v1/projects/(?P<project>[^/]+)/hmacKeys": (
+        StorageResponse.create_hmac_key
+    ),
+    r"GET /storage/v1/projects/(?P<project>[^/]+)/hmacKeys": (
+        StorageResponse.list_hmac_keys
+    ),
+    r"GET /storage/v1/projects/(?P<project>[^/]+)/hmacKeys/(?P<access_id>[^/]+)": (
+        StorageResponse.get_hmac_key
+    ),
+    r"PUT /storage/v1/projects/(?P<project>[^/]+)/hmacKeys/(?P<access_id>[^/]+)": (
+        StorageResponse.update_hmac_key
+    ),
+    r"DELETE /storage/v1/projects/(?P<project>[^/]+)/hmacKeys/(?P<access_id>[^/]+)": (
+        StorageResponse.delete_hmac_key
+    ),
+    # Bucket IAM policy (before the generic bucket routes).
+    r"GET /storage/v1/b/(?P<bucket>[^/]+)/iam/testPermissions": (
+        StorageResponse.test_bucket_iam
+    ),
+    r"GET /storage/v1/b/(?P<bucket>[^/]+)/iam": StorageResponse.get_bucket_iam,
+    r"PUT /storage/v1/b/(?P<bucket>[^/]+)/iam": StorageResponse.set_bucket_iam,
     # Buckets.
     r"POST /storage/v1/b": StorageResponse.insert_bucket,
     r"GET /storage/v1/b": StorageResponse.list_buckets,

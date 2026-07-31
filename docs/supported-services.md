@@ -20,7 +20,9 @@ namespace.
 | List objects (prefix + delimiter) | ✅ |
 | Delete object | ✅ |
 | Copy / rewrite object | ✅ |
-| Signed URLs, ACLs, IAM, notifications | ⬜ |
+| Bucket IAM policy (get / set / test) | ✅ |
+| HMAC keys (create / list / get / update / delete) | ✅ |
+| Signed URLs, object ACLs, notifications | ⬜ |
 
 ## Secret Manager (`secretmanager`)
 
