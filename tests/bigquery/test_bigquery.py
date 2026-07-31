@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from datetime import datetime, timezone
+
 import pytest
 from google.api_core import exceptions as gexc
 
@@ -124,3 +126,80 @@ def test_backend_is_inspectable() -> None:
     client = _client()
     client.create_dataset(f"{PROJECT}.ds")
     assert "ds" in get_backend("bigquery")[PROJECT].datasets
+
+
+@pytest.mark.parametrize(
+    ("stored", "expected"),
+    [
+        (
+            "2026-07-30T12:00:00+00:00",
+            datetime(2026, 7, 30, 12, 0, tzinfo=timezone.utc),
+        ),
+        ("2026-07-30T12:00:00Z", datetime(2026, 7, 30, 12, 0, tzinfo=timezone.utc)),
+        ("2026-07-30 12:00:00 UTC", datetime(2026, 7, 30, 12, 0, tzinfo=timezone.utc)),
+        ("2026-07-30T12:00:00", datetime(2026, 7, 30, 12, 0, tzinfo=timezone.utc)),
+        (
+            "2026-07-30T14:30:00+02:30",
+            datetime(2026, 7, 30, 12, 0, tzinfo=timezone.utc),
+        ),
+        (1785585600, datetime(2026, 8, 1, 12, 0, tzinfo=timezone.utc)),
+        (1785585600.5, datetime(2026, 8, 1, 12, 0, 0, 500000, tzinfo=timezone.utc)),
+    ],
+)
+def test_timestamp_column_roundtrips(stored, expected) -> None:
+    """Regression: TIMESTAMP cells must go out as epoch microseconds.
+
+    Real BigQuery accepts ISO-8601 (and epoch seconds) on insert but always
+    returns TIMESTAMP as epoch microseconds on ``tabledata.list``. Emitting the
+    stored string verbatim made the client raise ``ValueError`` on read.
+    """
+    from google.cloud import bigquery
+
+    client = _client()
+    client.create_dataset(f"{PROJECT}.ds")
+    client.create_table(
+        bigquery.Table(
+            f"{PROJECT}.ds.events",
+            schema=[bigquery.SchemaField("at", "TIMESTAMP")],
+        )
+    )
+
+    assert client.insert_rows_json(f"{PROJECT}.ds.events", [{"at": stored}]) == []
+
+    rows = [dict(r) for r in client.list_rows(f"{PROJECT}.ds.events")]
+    assert rows == [{"at": expected}]
+
+
+def test_timestamp_microsecond_precision_is_preserved() -> None:
+    from google.cloud import bigquery
+
+    client = _client()
+    client.create_dataset(f"{PROJECT}.ds")
+    client.create_table(
+        bigquery.Table(
+            f"{PROJECT}.ds.events",
+            schema=[bigquery.SchemaField("at", "TIMESTAMP")],
+        )
+    )
+    client.insert_rows_json(
+        f"{PROJECT}.ds.events", [{"at": "2026-07-30T12:00:00.123456+00:00"}]
+    )
+
+    (row,) = list(client.list_rows(f"{PROJECT}.ds.events"))
+    assert row["at"] == datetime(2026, 7, 30, 12, 0, 0, 123456, tzinfo=timezone.utc)
+
+
+def test_null_and_unparseable_timestamps_are_tolerated() -> None:
+    from google.cloud import bigquery
+
+    client = _client()
+    client.create_dataset(f"{PROJECT}.ds")
+    client.create_table(
+        bigquery.Table(
+            f"{PROJECT}.ds.events",
+            schema=[bigquery.SchemaField("at", "TIMESTAMP")],
+        )
+    )
+    client.insert_rows_json(f"{PROJECT}.ds.events", [{"at": None}])
+
+    assert [dict(r) for r in client.list_rows(f"{PROJECT}.ds.events")] == [{"at": None}]
