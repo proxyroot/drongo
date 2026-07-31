@@ -64,7 +64,7 @@ jobs:
           rm -rf public && mkdir public
           git archive origin/gh-pages | tar -x -C public
           echo "drongo.proxyroot.com" > public/CNAME
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: public
 
