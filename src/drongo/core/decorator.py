@@ -23,6 +23,7 @@ from typing import Any, TypeVar
 import responses
 
 from drongo.core import registry
+from drongo.core.aiohttp_intercept import AiohttpInterceptor
 from drongo.core.credentials import build_patchers
 
 F = TypeVar("F", bound=Callable[..., Any])
@@ -45,6 +46,7 @@ class DrongoController:
     def __init__(self) -> None:
         self._depth = 0
         self._responses: responses.RequestsMock | None = None
+        self._aiohttp: AiohttpInterceptor | None = None
         self._patchers: list[Any] = []
         self._emulators: list[Any] = []
 
@@ -67,6 +69,11 @@ class DrongoController:
                 service.response.register(mock)
         mock.start()
         self._responses = mock
+
+        # aiohttp interception for async clients (e.g. gcloud.aio.pubsub), served
+        # from the same REST routers. No-ops if aiohttp is not installed.
+        self._aiohttp = AiohttpInterceptor(registry.iter_services)
+        self._aiohttp.start()
 
         # Credential patchers, plus any service-provided patchers (e.g. forcing
         # a gRPC-default client onto its REST transport).
@@ -99,6 +106,10 @@ class DrongoController:
         for patcher in reversed(self._patchers):
             patcher.stop()
         self._patchers = []
+
+        if self._aiohttp is not None:
+            self._aiohttp.stop()
+            self._aiohttp = None
 
         if self._responses is not None:
             self._responses.stop()

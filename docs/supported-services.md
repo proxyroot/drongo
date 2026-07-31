@@ -40,9 +40,10 @@ REST during a mock scope (no code change needed) · Backend: per-project.
 
 ## Pub/Sub (`pubsub`)
 
-Client: `google-cloud-pubsub` · Transport: gRPC (default), served by an
-in-process gRPC emulator via `PUBSUB_EMULATOR_HOST` · Backend: global namespace.
-Use the normal client with no `transport` argument.
+Client: `google-cloud-pubsub` (sync, gRPC via `PUBSUB_EMULATOR_HOST`) and
+`gcloud.aio.pubsub` (async, aiohttp/REST via the aiohttp interceptor) · Backend:
+global namespace, shared between both transports. Use the normal clients with no
+changes.
 
 | Operation | Status |
 | --- | --- |
@@ -50,6 +51,7 @@ Use the normal client with no `transport` argument.
 | Create / get / list / delete subscription | ✅ |
 | Publish (with attributes, fan-out to all subs) | ✅ |
 | Pull / acknowledge | ✅ |
+| Async client (`gcloud.aio.pubsub`) | ✅ |
 | Nack via `modifyAckDeadline(0)` (redelivery) | ✅ |
 | Streaming pull (`subscribe()`) | ⬜ |
 | Ack-deadline expiry / retention | ⬜ |

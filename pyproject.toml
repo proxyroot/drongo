@@ -75,6 +75,8 @@ test = [
     "google-cloud-redis>=2.13",
     "google-cloud-datastore>=2.15",
     "google-cloud-bigtable>=2.21",
+    "gcloud-aio-pubsub>=6",
+    "pytest-asyncio>=0.23",
     "faker>=20",
 ]
 dev = [
@@ -155,6 +157,7 @@ ignore_missing_imports = true
 minversion = "7.0"
 testpaths = ["tests"]
 addopts = "-ra --strict-markers"
+asyncio_mode = "auto"
 # Turn drongo's own warnings into errors, but tolerate the deprecation noise the
 # google client libraries are known to emit.
 filterwarnings = [
