@@ -84,8 +84,11 @@ class AiohttpInterceptor:
 def _is_mock_host(host: str | None, port: int | None) -> bool:
     if not host:
         return False
-    if host in _LOCAL_HOSTS or host == "googleapis.com" or host.endswith(".googleapis.com"):
+    in_localhosts = host in _LOCAL_HOSTS
+    in_googleapis = host == "googleapis.com" or host.endswith(".googleapis.com")
+    if in_localhosts or in_googleapis:
         return True
+
     # The host gcloud.aio targets when an emulator env var is set.
     hostport = f"{host}:{port}" if port else host
     return any(
