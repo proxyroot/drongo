@@ -247,9 +247,24 @@ per-project. Use the normal client with no `transport` argument.
 | Transactions (accepted, completed synchronously) | ✅ |
 | Ancestor queries, projections, cursors, aggregation | ⬜ |
 
+## Bigtable (`bigtable`)
+
+Client: `google-cloud-bigtable` (`bigtable.Client`) · Transport: gRPC (default),
+served by an in-process gRPC emulator via `BIGTABLE_EMULATOR_HOST` · Backend:
+per-project. Use the normal client with `admin=True`.
+
+| Operation | Status |
+| --- | --- |
+| Create / get / list / delete table, modify families | ✅ |
+| `set_cell`, versioned cells, deletes | ✅ |
+| `read_row`, `read_rows` (ranges, limit) | ✅ |
+| Batch `mutate_rows`, `sample_row_keys` | ✅ |
+| Read filters, `check_and_mutate_row` | ⬜ |
+| Instance admin, change streams, aggregations | ⬜ |
+
 ## Planned
 
-Cloud Spanner · Cloud Bigtable · Firestore transactions & listeners · IAM roles
-& policies · KMS key versions. See the
+Cloud Spanner · Firestore transactions & listeners · IAM roles & policies · KMS
+key versions · Bigtable read filters. See the
 [roadmap](https://drongo.proxyroot.com/roadmap/) and
 [open a service request](https://github.com/proxyroot/drongo/issues/new/choose).
