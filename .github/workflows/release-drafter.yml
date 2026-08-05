@@ -23,7 +23,7 @@ jobs:
       contents: write # create/update the draft release
       pull-requests: read # release-drafter queries PRs associated with commits
     steps:
-      - uses: release-drafter/release-drafter@v6
+      - uses: release-drafter/release-drafter@v7
         with:
           config-name: release-drafter.yml
         env:
