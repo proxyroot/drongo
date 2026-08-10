@@ -299,9 +299,24 @@ Backend: per-project. Use the normal clients with no `transport` argument.
 | Uptime checks, groups, snoozes, services + SLOs | ✅ |
 | MQL query (separate `QueryService`) | ⬜ |
 
+## Document AI (`documentai`)
+
+Client: `google-cloud-documentai` (`documentai_v1`) · Transport: gRPC (default),
+forced to REST during a mock scope · Backend: per-project. Use the normal client
+with no `transport` argument; pass the regional endpoint as usual.
+
+| Operation | Status |
+| --- | --- |
+| Processors: create / get / list / delete (LRO) | ✅ |
+| Enable / disable processor (LRO) | ✅ |
+| Process document (`process_document`, via a handler) | ✅ |
+| Batch process (`batch_process_documents`, LRO) | ✅ |
+| Processor types: fetch / list / get | ✅ |
+| Processor versions, human review, evaluations | ⬜ |
+
 ## Planned
 
-Next up (prioritized): Document AI · Artifact Registry · Storage Transfer.
+Next up (prioritized): Artifact Registry · Storage Transfer.
 
 Also planned: Cloud Spanner · Firestore transactions & listeners · IAM roles &
 policies · KMS key versions · Bigtable read filters. See the
