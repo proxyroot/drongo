@@ -73,6 +73,7 @@ nav:
       - Memorystore (Redis): services/memorystore.md
       - Vertex AI: services/vertexai.md
       - Cloud Monitoring: services/monitoring.md
+      - Document AI: services/documentai.md
   - Executable handlers: executable-handlers.md
   - Generating data: seeding.md
   - Standalone server: server.md

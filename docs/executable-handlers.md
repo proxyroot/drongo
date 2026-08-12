@@ -28,6 +28,7 @@ when the `mock_gcp` scope resets between tests.
 | Pub/Sub | `pubsub.subscription_handler(sub)` | `publish` fans out to the subscription | a `PushMessage` |
 | Cloud Scheduler | `cloudscheduler.job_handler(job)` | `run_job` | a `SchedulerRequest` |
 | Vertex AI | `vertexai.prediction_handler(endpoint)` | `predict` on the endpoint | `(instances, parameters)` |
+| Document AI | `documentai.processor_handler(processor)` | `process_document` on the processor | `(content, mime_type)` |
 
 ## Cloud Run Jobs
 
@@ -165,4 +166,7 @@ get_backend("pubsub")["my-project"].register_handler(sub_name, my_fn)
 
 # Vertex AI's predict handler has its own name:
 get_backend("vertexai")["my-project"].register_prediction_handler(endpoint_name, my_fn)
+get_backend("documentai")["my-project"].register_processor_handler(
+    processor_name, my_fn
+)
 ```
