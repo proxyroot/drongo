@@ -29,6 +29,7 @@ Legend: ✅ available · 🚧 partial · ⬜ planned
 | Cloud Monitoring | injected gRPC transport | metrics + aggregation, alert policies, notification channels, uptime checks, groups, snoozes, services/SLOs |
 | Storage Transfer | forced REST (LRO) | transfer jobs (CRUD + run), transfer operations, service account, agent pools |
 | Document AI | forced REST (LRO) | processors (CRUD + enable/disable), process document (handler), batch process, processor types |
+| Artifact Registry | forced REST (LRO) | repositories (CRUD), tags (CRUD), packages/versions/files (read/delete, seedable) |
 
 ## Available capabilities
 
@@ -40,14 +41,6 @@ Legend: ✅ available · 🚧 partial · ⬜ planned
 - ✅ **Typed** (`py.typed`, mypy-checked)
 
 ## Planned services
-
-### Next up — prioritized
-
-These are the next services to build, ahead of the tiers below.
-
-| Service | Client | Notes |
-| --- | --- | --- |
-| Artifact Registry | `google-cloud-artifact-registry` | repositories, packages, versions, tags |
 
 ### Tier 1 — shipped
 
@@ -73,8 +66,6 @@ table above). The one item still open is:
 
 Dataflow · Dataproc · Vision / Speech / Translation / Natural Language · GKE
 (Container) · Cloud Build · Cloud DNS · Eventarc · Workflows · Cloud Trace.
-
-(Artifact Registry is promoted to [Next up](#next-up-prioritized).)
 
 ## Planned capabilities
 

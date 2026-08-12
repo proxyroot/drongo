@@ -328,9 +328,22 @@ the normal client with no `transport` argument; methods take `request=` objects.
 | Agent pools: create / get / list / update / delete | ✅ |
 | Actual data movement between buckets | ⬜ (no real I/O) |
 
-## Planned
+## Artifact Registry (`artifactregistry`)
 
-Next up (prioritized): Artifact Registry.
+Client: `google-cloud-artifact-registry` (`artifactregistry_v1`) · Transport: gRPC
+(default), forced to REST during a mock scope · Backend: per-project. Use the
+normal client with no `transport` argument.
+
+| Operation | Status |
+| --- | --- |
+| Repositories: create / get / list / update / delete (LRO) | ✅ |
+| Tags: create / get / list / update / delete | ✅ |
+| Packages: list / get / delete (LRO), seed via backend | ✅ |
+| Versions: list / get / delete (LRO), seed via backend | ✅ |
+| Files: list / get, seed via backend | ✅ |
+| Artifact upload/download, IAM, format-specific APIs | ⬜ |
+
+## Planned
 
 Also planned: Cloud Spanner · Firestore transactions & listeners · IAM roles &
 policies · KMS key versions · Bigtable read filters. See the
