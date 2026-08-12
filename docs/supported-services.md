@@ -314,9 +314,24 @@ with no `transport` argument; pass the regional endpoint as usual.
 | Processor types: fetch / list / get | ✅ |
 | Processor versions, human review, evaluations | ⬜ |
 
+## Artifact Registry (`artifactregistry`)
+
+Client: `google-cloud-artifact-registry` (`artifactregistry_v1`) · Transport: gRPC
+(default), forced to REST during a mock scope · Backend: per-project. Use the
+normal client with no `transport` argument.
+
+| Operation | Status |
+| --- | --- |
+| Repositories: create / get / list / update / delete (LRO) | ✅ |
+| Tags: create / get / list / update / delete | ✅ |
+| Packages: list / get / delete (LRO), seed via backend | ✅ |
+| Versions: list / get / delete (LRO), seed via backend | ✅ |
+| Files: list / get, seed via backend | ✅ |
+| Artifact upload/download, IAM, format-specific APIs | ⬜ |
+
 ## Planned
 
-Next up (prioritized): Artifact Registry · Storage Transfer.
+Next up (prioritized): Storage Transfer.
 
 Also planned: Cloud Spanner · Firestore transactions & listeners · IAM roles &
 policies · KMS key versions · Bigtable read filters. See the

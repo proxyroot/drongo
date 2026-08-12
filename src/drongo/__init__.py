@@ -33,6 +33,7 @@ from drongo.core.registry import get_backend, reset_all_backends
 #: for their public helpers, such as the executable-handler decorators.
 _SERVICE_MODULES = frozenset(
     {
+        "artifactregistry",
         "bigquery",
         "bigtable",
         "cloudfunctions",
