@@ -8,6 +8,7 @@ creating a subpackage here and importing it below.
 from __future__ import annotations
 
 from drongo.services import (
+    artifactregistry,
     bigquery,
     bigtable,
     cloudfunctions,
@@ -30,6 +31,7 @@ from drongo.services import (
 )
 
 __all__ = [
+    "artifactregistry",
     "bigquery",
     "bigtable",
     "cloudfunctions",
