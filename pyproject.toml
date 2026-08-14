@@ -78,6 +78,7 @@ test = [
     "google-cloud-aiplatform>=1.40",
     "google-cloud-monitoring>=2.15",
     "google-cloud-documentai>=2.20",
+    "google-cloud-storage-transfer>=1.11",
     "gcloud-aio-pubsub>=6",
     "pytest-asyncio>=0.23",
     "faker>=20",

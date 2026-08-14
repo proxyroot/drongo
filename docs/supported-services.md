@@ -314,9 +314,23 @@ with no `transport` argument; pass the regional endpoint as usual.
 | Processor types: fetch / list / get | ✅ |
 | Processor versions, human review, evaluations | ⬜ |
 
+## Storage Transfer (`storagetransfer`)
+
+Client: `google-cloud-storage-transfer` (`storage_transfer_v1`) · Transport: gRPC
+(default), forced to REST during a mock scope · Backend: one global namespace. Use
+the normal client with no `transport` argument; methods take `request=` objects.
+
+| Operation | Status |
+| --- | --- |
+| Transfer jobs: create / get / list / update / delete | ✅ |
+| Run transfer job (LRO) + operation get / pause / resume / cancel | ✅ |
+| Google service account: get | ✅ |
+| Agent pools: create / get / list / update / delete | ✅ |
+| Actual data movement between buckets | ⬜ (no real I/O) |
+
 ## Planned
 
-Next up (prioritized): Artifact Registry · Storage Transfer.
+Next up (prioritized): Artifact Registry.
 
 Also planned: Cloud Spanner · Firestore transactions & listeners · IAM roles &
 policies · KMS key versions · Bigtable read filters. See the
