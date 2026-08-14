@@ -26,6 +26,7 @@ from drongo.services import (
     resourcemanager,
     secretmanager,
     storage,
+    storagetransfer,
     vertexai,
 )
 
@@ -48,5 +49,6 @@ __all__ = [
     "resourcemanager",
     "secretmanager",
     "storage",
+    "storagetransfer",
     "vertexai",
 ]
