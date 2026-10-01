@@ -126,6 +126,8 @@ class StorageResponse(BaseResponse):
         versioning = body.get("versioning")
         if isinstance(versioning, dict) and "enabled" in versioning:
             bucket.versioning_enabled = bool(versioning["enabled"])
+        if "acl" in body:
+            bucket.acl = list(body["acl"] or [])
         bucket.metageneration += 1
         return json_response(bucket.to_resource())
 
@@ -271,6 +273,8 @@ class StorageResponse(BaseResponse):
                     blob.metadata[key] = value
         if "cacheControl" in body:
             blob.cache_control = body["cacheControl"]
+        if "acl" in body:
+            blob.acl = list(body["acl"] or [])
         blob.metageneration += 1
         return json_response(blob.to_resource())
 
@@ -306,6 +310,110 @@ class StorageResponse(BaseResponse):
         )
         return json_response(blob.to_resource())
 
+    # -- object ACLs -------------------------------------------------------
+
+    def list_object_acl(self, request: Request) -> HttpResponse:
+        blob = self._blob(request)
+        return json_response(_acl_list("object", blob.acl))
+
+    def get_object_acl(self, request: Request) -> HttpResponse:
+        blob = self._blob(request)
+        return json_response(
+            _acl_get("object", blob.acl, request.path_params["entity"])
+        )
+
+    def insert_object_acl(self, request: Request) -> HttpResponse:
+        blob = self._blob(request)
+        body = request.json()
+        entry = _acl_put(blob.acl, body["entity"], body.get("role", "READER"))
+        return json_response(_acl_entry("object", entry))
+
+    def update_object_acl(self, request: Request) -> HttpResponse:
+        blob = self._blob(request)
+        entity = request.path_params["entity"]
+        entry = _acl_put(blob.acl, entity, request.json().get("role", "READER"))
+        return json_response(_acl_entry("object", entry))
+
+    def delete_object_acl(self, request: Request) -> HttpResponse:
+        blob = self._blob(request)
+        _acl_delete(blob.acl, request.path_params["entity"])
+        return 204, {}, ""
+
+    def _blob(self, request: Request) -> Blob:
+        return self.backend.get_blob(
+            request.path_params["bucket"], request.path_params["object"]
+        )
+
+    # -- bucket ACLs -------------------------------------------------------
+
+    def list_bucket_acl(self, request: Request) -> HttpResponse:
+        bucket = self.backend.get_bucket(request.path_params["bucket"])
+        return json_response(_acl_list("bucket", bucket.acl))
+
+    def get_bucket_acl(self, request: Request) -> HttpResponse:
+        bucket = self.backend.get_bucket(request.path_params["bucket"])
+        return json_response(
+            _acl_get("bucket", bucket.acl, request.path_params["entity"])
+        )
+
+    def insert_bucket_acl(self, request: Request) -> HttpResponse:
+        bucket = self.backend.get_bucket(request.path_params["bucket"])
+        body = request.json()
+        entry = _acl_put(bucket.acl, body["entity"], body.get("role", "READER"))
+        return json_response(_acl_entry("bucket", entry))
+
+    def update_bucket_acl(self, request: Request) -> HttpResponse:
+        bucket = self.backend.get_bucket(request.path_params["bucket"])
+        entity = request.path_params["entity"]
+        entry = _acl_put(bucket.acl, entity, request.json().get("role", "READER"))
+        return json_response(_acl_entry("bucket", entry))
+
+    def delete_bucket_acl(self, request: Request) -> HttpResponse:
+        bucket = self.backend.get_bucket(request.path_params["bucket"])
+        _acl_delete(bucket.acl, request.path_params["entity"])
+        return 204, {}, ""
+
+    # -- notifications -----------------------------------------------------
+
+    def create_notification(self, request: Request) -> HttpResponse:
+        notification = self.backend.create_notification(
+            request.path_params["bucket"], request.json()
+        )
+        return json_response(notification)
+
+    def list_notifications(self, request: Request) -> HttpResponse:
+        items = self.backend.list_notifications(request.path_params["bucket"])
+        return json_response({"kind": "storage#notifications", "items": items})
+
+    def get_notification(self, request: Request) -> HttpResponse:
+        return json_response(
+            self.backend.get_notification(
+                request.path_params["bucket"], request.path_params["notification"]
+            )
+        )
+
+    def delete_notification(self, request: Request) -> HttpResponse:
+        self.backend.delete_notification(
+            request.path_params["bucket"], request.path_params["notification"]
+        )
+        return 204, {}, ""
+
+    # -- signed URLs (XML API paths) ---------------------------------------
+
+    def xml_download(self, request: Request) -> HttpResponse:
+        return self._serve_media(
+            request, request.path_params["bucket"], request.path_params["object"]
+        )
+
+    def xml_upload(self, request: Request) -> HttpResponse:
+        blob = self.backend.put_blob(
+            request.path_params["bucket"],
+            request.path_params["object"],
+            request.body,
+            content_type=request.header("Content-Type"),
+        )
+        return 200, {"ETag": blob.etag}, ""
+
     # -- helpers -----------------------------------------------------------
 
     @staticmethod
@@ -318,6 +426,42 @@ class StorageResponse(BaseResponse):
 
 
 # --- module-level helpers --------------------------------------------------
+
+
+def _acl_list(kind: str, entries: list[dict]) -> dict:
+    return {
+        "kind": f"storage#{kind}AccessControls",
+        "items": [_acl_entry(kind, dict(entry)) for entry in entries],
+    }
+
+
+def _acl_entry(kind: str, entry: dict) -> dict:
+    return {"kind": f"storage#{kind}AccessControl", **entry}
+
+
+def _acl_get(kind: str, entries: list[dict], entity: str) -> dict:
+    for entry in entries:
+        if entry.get("entity") == entity:
+            return _acl_entry(kind, dict(entry))
+    raise exceptions.not_found(f"ACL entry not found: {entity}")
+
+
+def _acl_put(entries: list[dict], entity: str, role: str) -> dict:
+    for entry in entries:
+        if entry.get("entity") == entity:
+            entry["role"] = role
+            return entry
+    entry = {"entity": entity, "role": role}
+    entries.append(entry)
+    return entry
+
+
+def _acl_delete(entries: list[dict], entity: str) -> None:
+    for index, entry in enumerate(entries):
+        if entry.get("entity") == entity:
+            del entries[index]
+            return
+    raise exceptions.not_found(f"ACL entry not found: {entity}")
 
 
 def _goog_hash(blob: Blob) -> str:

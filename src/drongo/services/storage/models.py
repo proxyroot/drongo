@@ -57,6 +57,7 @@ class Blob:
     content_encoding: str | None = None
     content_disposition: str | None = None
     content_language: str | None = None
+    acl: list[dict[str, Any]] = field(default_factory=list)
     time_created: str = field(default_factory=now_rfc3339)
     updated: str = field(default_factory=now_rfc3339)
 
@@ -105,6 +106,8 @@ class Blob:
             resource["crc32c"] = self.crc32c
         if self.metadata:
             resource["metadata"] = dict(self.metadata)
+        if self.acl:
+            resource["acl"] = [dict(entry) for entry in self.acl]
         for key, value in (
             ("cacheControl", self.cache_control),
             ("contentEncoding", self.content_encoding),
@@ -127,9 +130,11 @@ class Bucket:
     metageneration: int = 1
     versioning_enabled: bool = False
     labels: dict[str, str] = field(default_factory=dict)
+    acl: list[dict[str, Any]] = field(default_factory=list)
     time_created: str = field(default_factory=now_rfc3339)
     updated: str = field(default_factory=now_rfc3339)
     blobs: dict[str, Blob] = field(default_factory=dict)
+    notifications: dict[str, dict[str, Any]] = field(default_factory=dict)
     iam_policy: dict[str, Any] | None = None
 
     def to_resource(self) -> dict:
@@ -153,6 +158,8 @@ class Bucket:
         }
         if self.labels:
             resource["labels"] = dict(self.labels)
+        if self.acl:
+            resource["acl"] = [dict(entry) for entry in self.acl]
         return resource
 
 
@@ -366,6 +373,46 @@ class StorageBackend(BaseBackend):
             content_type=source.content_type,
             metadata=dict(source.metadata),
         )
+
+    # -- notifications -----------------------------------------------------
+
+    def create_notification(
+        self, bucket_name: str, config: dict[str, Any]
+    ) -> dict[str, Any]:
+        bucket = self.get_bucket(bucket_name)
+        notification_id = str(self._tick())
+        reserved = ("kind", "id", "selfLink", "etag")
+        resource: dict[str, Any] = {
+            "kind": "storage#notification",
+            "id": notification_id,
+            "selfLink": (
+                f"{STORAGE_ENDPOINT}/storage/v1/b/{bucket_name}"
+                f"/notificationConfigs/{notification_id}"
+            ),
+            "etag": notification_id,
+            **{k: v for k, v in config.items() if k not in reserved},
+        }
+        bucket.notifications[notification_id] = resource
+        return resource
+
+    def list_notifications(self, bucket_name: str) -> list[dict[str, Any]]:
+        bucket = self.get_bucket(bucket_name)
+        return [bucket.notifications[i] for i in sorted(bucket.notifications)]
+
+    def get_notification(
+        self, bucket_name: str, notification_id: str
+    ) -> dict[str, Any]:
+        bucket = self.get_bucket(bucket_name)
+        try:
+            return bucket.notifications[notification_id]
+        except KeyError:
+            raise exceptions.not_found(f"Notification not found: {notification_id}")
+
+    def delete_notification(self, bucket_name: str, notification_id: str) -> None:
+        bucket = self.get_bucket(bucket_name)
+        if notification_id not in bucket.notifications:
+            raise exceptions.not_found(f"Notification not found: {notification_id}")
+        del bucket.notifications[notification_id]
 
 
 #: Project-keyed backends. Buckets are a global namespace (like S3 in moto), so

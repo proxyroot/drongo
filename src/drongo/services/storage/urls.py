@@ -41,6 +41,57 @@ url_paths = {
     ),
     r"GET /storage/v1/b/(?P<bucket>[^/]+)/iam": StorageResponse.get_bucket_iam,
     r"PUT /storage/v1/b/(?P<bucket>[^/]+)/iam": StorageResponse.set_bucket_iam,
+    # Object ACLs (entity routes before the collection route).
+    r"GET /storage/v1/b/(?P<bucket>[^/]+)/o/(?P<object>[^/]+)/acl/(?P<entity>[^/]+)": (
+        StorageResponse.get_object_acl
+    ),
+    r"PUT /storage/v1/b/(?P<bucket>[^/]+)/o/(?P<object>[^/]+)/acl/(?P<entity>[^/]+)": (
+        StorageResponse.update_object_acl
+    ),
+    (
+        r"PATCH /storage/v1/b/(?P<bucket>[^/]+)/o/(?P<object>[^/]+)"
+        r"/acl/(?P<entity>[^/]+)"
+    ): StorageResponse.update_object_acl,
+    (
+        r"DELETE /storage/v1/b/(?P<bucket>[^/]+)/o/(?P<object>[^/]+)"
+        r"/acl/(?P<entity>[^/]+)"
+    ): StorageResponse.delete_object_acl,
+    r"GET /storage/v1/b/(?P<bucket>[^/]+)/o/(?P<object>[^/]+)/acl": (
+        StorageResponse.list_object_acl
+    ),
+    r"POST /storage/v1/b/(?P<bucket>[^/]+)/o/(?P<object>[^/]+)/acl": (
+        StorageResponse.insert_object_acl
+    ),
+    # Bucket ACLs.
+    r"GET /storage/v1/b/(?P<bucket>[^/]+)/acl/(?P<entity>[^/]+)": (
+        StorageResponse.get_bucket_acl
+    ),
+    r"PUT /storage/v1/b/(?P<bucket>[^/]+)/acl/(?P<entity>[^/]+)": (
+        StorageResponse.update_bucket_acl
+    ),
+    r"PATCH /storage/v1/b/(?P<bucket>[^/]+)/acl/(?P<entity>[^/]+)": (
+        StorageResponse.update_bucket_acl
+    ),
+    r"DELETE /storage/v1/b/(?P<bucket>[^/]+)/acl/(?P<entity>[^/]+)": (
+        StorageResponse.delete_bucket_acl
+    ),
+    r"GET /storage/v1/b/(?P<bucket>[^/]+)/acl": StorageResponse.list_bucket_acl,
+    r"POST /storage/v1/b/(?P<bucket>[^/]+)/acl": StorageResponse.insert_bucket_acl,
+    # Notifications.
+    r"POST /storage/v1/b/(?P<bucket>[^/]+)/notificationConfigs": (
+        StorageResponse.create_notification
+    ),
+    r"GET /storage/v1/b/(?P<bucket>[^/]+)/notificationConfigs": (
+        StorageResponse.list_notifications
+    ),
+    (
+        r"GET /storage/v1/b/(?P<bucket>[^/]+)/notificationConfigs"
+        r"/(?P<notification>[^/]+)"
+    ): StorageResponse.get_notification,
+    (
+        r"DELETE /storage/v1/b/(?P<bucket>[^/]+)/notificationConfigs"
+        r"/(?P<notification>[^/]+)"
+    ): StorageResponse.delete_notification,
     # Buckets.
     r"POST /storage/v1/b": StorageResponse.insert_bucket,
     r"GET /storage/v1/b": StorageResponse.list_buckets,
@@ -67,4 +118,8 @@ url_paths = {
     r"DELETE /storage/v1/b/(?P<bucket>[^/]+)/o/(?P<object>[^/]+)": (
         StorageResponse.delete_object
     ),
+    # Signed-URL access via the XML API paths. Listed last so every JSON API
+    # path (which starts with storage/upload/download) matches its route first.
+    r"PUT /(?P<bucket>[^/]+)/(?P<object>.+)": StorageResponse.xml_upload,
+    r"GET /(?P<bucket>[^/]+)/(?P<object>.+)": StorageResponse.xml_download,
 }

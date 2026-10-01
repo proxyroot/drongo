@@ -10,7 +10,7 @@ Legend: ✅ available · 🚧 partial · ⬜ planned
 
 | Service | Transport strategy | Depth |
 | --- | --- | --- |
-| Cloud Storage | REST interception | buckets, objects, uploads (simple/multipart/resumable), ranged downloads, list, copy/rewrite |
+| Cloud Storage | REST interception | buckets, objects, uploads (simple/multipart/resumable), ranged downloads, list, copy/rewrite, IAM, HMAC keys, ACLs, notifications, signed URLs |
 | Secret Manager | forced REST | secrets, versions, access, enable/disable/destroy |
 | Pub/Sub | in-process gRPC emulator | topics, subscriptions, publish fan-out, pull/ack/nack, push handlers |
 | BigQuery | REST interception | datasets, tables, streaming inserts, read rows, SQL query execution (via `drongo[bigquery]`) |
@@ -52,12 +52,8 @@ These are the next services to build, ahead of the tiers below.
 ### Tier 1 — shipped
 
 Tier 1 is done: Cloud Logging, Cloud KMS, IAM & Service Accounts, Cloud
-Scheduler, Cloud Functions, Datastore, and Memorystore are all available (see the
-table above). The one item still open is:
-
-| Service | Client | Notes |
-| --- | --- | --- |
-| Storage depth | `google-cloud-storage` | signed URLs, IAM, notifications, HMAC keys |
+Scheduler, Cloud Functions, Datastore, Memorystore, and Storage depth (IAM, HMAC
+keys, ACLs, notifications, signed URLs) are all available.
 
 ### Tier 2 — databases & infrastructure
 
