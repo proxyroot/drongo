@@ -173,6 +173,9 @@ filterwarnings = [
     # google.api_core nags (FutureWarning) about Python 3.10's upcoming EOL on
     # import; harmless for tests and out of our control.
     "ignore:You are using a Python version:FutureWarning",
+    # The Bigtable client warns when it sees BIGTABLE_EMULATOR_HOST, which drongo
+    # sets on purpose to point it at the in-process emulator.
+    "ignore:Connecting to Bigtable emulator:RuntimeWarning",
 ]
 
 [tool.coverage.run]
