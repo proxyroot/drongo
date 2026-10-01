@@ -22,7 +22,9 @@ namespace.
 | Copy / rewrite object | ✅ |
 | Bucket IAM policy (get / set / test) | ✅ |
 | HMAC keys (create / list / get / update / delete) | ✅ |
-| Signed URLs, object ACLs, notifications | ⬜ |
+| Object / bucket ACLs (incl. `make_public`) | ✅ |
+| Notifications (create / list / get / delete) | ✅ |
+| Signed URLs (generate + serve via GET / PUT) | ✅ |
 
 ## Secret Manager (`secretmanager`)
 
