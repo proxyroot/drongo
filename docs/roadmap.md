@@ -39,6 +39,10 @@ Legend: ✅ available · 🚧 partial · ⬜ planned
 - ✅ **Faker data seeding** (`drongo.seed`)
 - ✅ **Standalone HTTP server** (`drongo server`) for non-Python SDKs
 - ✅ **Typed** (`py.typed`, mypy-checked)
+- 🚧 **Verified against real GCP** ([fidelity suite](fidelity.md)): dual-target
+  `@gcp_verified` scenarios that run under the mock in CI and against a real
+  project on demand, with divergence recorded in `KNOWN_GAPS.md`. Cloud Storage
+  and Pub/Sub are covered so far.
 
 ## Planned services
 
@@ -68,7 +72,17 @@ Dataflow · Dataproc · Vision / Speech / Translation / Natural Language · GKE
 Informed by moto's management plane and coverage tracking:
 
 - ⬜ **Coverage matrix** — a per-operation status doc for every service (moto's
-  `IMPLEMENTATION_COVERAGE.md` is the model), so gaps are explicit.
+  `IMPLEMENTATION_COVERAGE.md` is the model), so gaps are explicit. Intended to
+  be generated from Google's [Discovery documents](https://discovery.googleapis.com/discovery/v1/apis)
+  and the [googleapis](https://github.com/googleapis/googleapis) protos,
+  cross-referenced with each service's `urls.py` and its `@gcp_verified`
+  scenarios, giving three states per method: verified, implemented, missing.
+- ⬜ **Recorded live responses** — normalised request/response pairs captured on
+  a live [fidelity](fidelity.md) run and replayed in CI, so drift in the real
+  service is detected without credentials on every pull request.
+- ⬜ **Fidelity scenarios for every service** — extend the suite past Cloud
+  Storage and Pub/Sub, and make them a requirement in
+  [contributing a service](contributing-a-service.md).
 - ⬜ **Management endpoint in server mode** — an HTTP reset/seed/config route
   (à la moto's `/moto-api/reset`) for cross-process and non-Python test suites.
 - ⬜ **State-transition manager** — let resources advance over time/calls
