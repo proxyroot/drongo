@@ -163,6 +163,12 @@ minversion = "7.0"
 testpaths = ["tests"]
 addopts = "-ra --strict-markers"
 asyncio_mode = "auto"
+markers = [
+    # tests/fidelity: a scenario whose assertions were checked against real GCP.
+    # Runs under the mock by default; set DRONGO_TEST_ALLOW_GCP_REQUEST=true and
+    # DRONGO_TEST_PROJECT to re-verify it against the real service.
+    "gcp_verified: dual-target fidelity scenario (mock by default, real GCP opt-in)",
+]
 # Turn drongo's own warnings into errors, but tolerate the deprecation noise the
 # google client libraries are known to emit.
 filterwarnings = [

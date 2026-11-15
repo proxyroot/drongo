@@ -1,0 +1,81 @@
+name: Fidelity (real GCP)
+
+# Re-verifies the tests/fidelity scenarios against a real GCP project, which is
+# what makes them evidence rather than assertions about drongo's own behaviour.
+#
+# Manual only, on purpose: a live run creates real, billable resources, so it
+# never fires on a push, a pull request or a timer. PR CI already runs the same
+# scenarios under the mock in the Test jobs.
+#
+# To enable it, a maintainer sets three repository variables/secrets pointing at
+# a sandbox project with a budget alert:
+#
+#   vars.GCP_FIDELITY_PROJECT              the project to create resources in
+#   secrets.GCP_WORKLOAD_IDENTITY_PROVIDER a Workload Identity Federation provider
+#   secrets.GCP_SERVICE_ACCOUNT            the service account to impersonate
+#
+# Until they are set the job skips with a message instead of failing, so the
+# workflow is inert on forks and on a fresh clone.
+
+on:
+  workflow_dispatch:
+    inputs:
+      pytest_args:
+        description: "Extra pytest args (e.g. -k storage)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+  id-token: write  # required for keyless auth to GCP
+
+jobs:
+  verify:
+    name: Verify against real GCP
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0  # tags needed for hatch-vcs version
+
+      - name: Check configuration
+        id: config
+        env:
+          PROJECT: ${{ vars.GCP_FIDELITY_PROJECT }}
+          PROVIDER: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+        run: |
+          if [ -z "$PROJECT" ] || [ -z "$PROVIDER" ]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Live fidelity run skipped: no sandbox project configured. See .github/workflows/fidelity.yml for setup."
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Authenticate to GCP
+        if: steps.config.outputs.configured == 'true'
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Install uv
+        if: steps.config.outputs.configured == 'true'
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          cache-dependency-glob: "pyproject.toml"
+
+      - name: Create environment
+        if: steps.config.outputs.configured == 'true'
+        run: uv venv --python 3.12
+
+      - name: Install (test)
+        if: steps.config.outputs.configured == 'true'
+        run: uv pip install -e ".[test]"
+
+      - name: Run fidelity suite against real GCP
+        if: steps.config.outputs.configured == 'true'
+        env:
+          DRONGO_TEST_ALLOW_GCP_REQUEST: "true"
+          DRONGO_TEST_PROJECT: ${{ vars.GCP_FIDELITY_PROJECT }}
+        run: uv run pytest tests/fidelity -v ${{ inputs.pytest_args }}

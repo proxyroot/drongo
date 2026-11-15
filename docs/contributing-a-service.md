@@ -98,6 +98,13 @@ through `mock_gcp` (or the `drongo` fixture). Assert on client-observable behavi
 first, and optionally on raw backend state via
 `get_backend("widgets")["project"]`.
 
+If you have a project to test against, also add a few `@gcp_verified` scenarios
+under `tests/fidelity/`. Those run under the mock in CI like any other test, but
+can be re-run against the real service to confirm the behavior you implemented
+from the docs is the behavior GCP actually has. See
+[verifying against real GCP](fidelity.md); it is the best way to catch a status
+code or a state transition that reads right and is wrong.
+
 ## gRPC-first services (no REST transport)
 
 Some services (Pub/Sub, Firestore) default to gRPC and cannot be intercepted via
