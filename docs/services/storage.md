@@ -147,6 +147,33 @@ def test_iam_and_hmac():
     metadata.delete()  # must be INACTIVE first, like real GCS
 ```
 
+## ACLs, notifications, and signed URLs
+
+Object and bucket ACLs work through the normal client (`make_public`, granting a
+specific user, `reload`). Notifications are full CRUD. Signed URLs are generated
+without needing a signing key (the mock substitutes a deterministic URL) and the
+resulting URL is served by the mock, so a plain `requests.get`/`put` round-trips:
+
+```python
+@mock_gcp
+def test_storage_depth():
+    import requests
+    from google.cloud import storage
+
+    client = storage.Client(project="my-project")
+    bucket = client.create_bucket("b")
+    blob = bucket.blob("file.txt")
+    blob.upload_from_string(b"hello", content_type="text/plain")
+
+    blob.make_public()  # grants allUsers READER via the object ACL
+
+    bucket.notification(topic_name="t", topic_project="my-project").create()
+    assert len(list(bucket.list_notifications())) == 1
+
+    url = blob.generate_signed_url(version="v4", expiration=3600, method="GET")
+    assert requests.get(url).content == b"hello"
+```
+
 ## Coverage
 
 | Operation | Status |
@@ -164,4 +191,6 @@ def test_iam_and_hmac():
 | Copy / rewrite object | Supported |
 | Bucket IAM policy (get / set / test permissions) | Supported |
 | HMAC keys (create / list / get / update / delete) | Supported |
-| Signed URLs, object ACLs, notifications | Planned |
+| Object / bucket ACLs (incl. `make_public`) | Supported |
+| Notifications (create / list / get / delete) | Supported |
+| Signed URLs (generate + serve via GET / PUT) | Supported |
