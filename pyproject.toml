@@ -78,6 +78,8 @@ test = [
     "google-cloud-aiplatform>=1.40",
     "google-cloud-monitoring>=2.15",
     "google-cloud-documentai>=2.20",
+    "google-cloud-storage-transfer>=1.11",
+    "google-cloud-artifact-registry>=1.11",
     "gcloud-aio-pubsub>=6",
     "pytest-asyncio>=0.23",
     "faker>=20",
@@ -161,6 +163,12 @@ minversion = "7.0"
 testpaths = ["tests"]
 addopts = "-ra --strict-markers"
 asyncio_mode = "auto"
+markers = [
+    # tests/fidelity: a scenario whose assertions were checked against real GCP.
+    # Runs under the mock by default; set DRONGO_TEST_ALLOW_GCP_REQUEST=true and
+    # DRONGO_TEST_PROJECT to re-verify it against the real service.
+    "gcp_verified: dual-target fidelity scenario (mock by default, real GCP opt-in)",
+]
 # Turn drongo's own warnings into errors, but tolerate the deprecation noise the
 # google client libraries are known to emit.
 filterwarnings = [
@@ -169,8 +177,13 @@ filterwarnings = [
     "ignore::ResourceWarning",
     "ignore::ImportWarning",
     # google.api_core nags (FutureWarning) about Python 3.10's upcoming EOL on
-    # import; harmless for tests and out of our control.
-    "ignore:You are using a Python version:FutureWarning",
+    # import; harmless for tests and out of our control. The wording has shifted
+    # between releases ("a Python version" / "a non-supported Python version"),
+    # so match both.
+    "ignore:You are using a .*Python version:FutureWarning",
+    # The Bigtable client warns when it sees BIGTABLE_EMULATOR_HOST, which drongo
+    # sets on purpose to point it at the in-process emulator.
+    "ignore:Connecting to Bigtable emulator:RuntimeWarning",
 ]
 
 [tool.coverage.run]

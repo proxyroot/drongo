@@ -10,7 +10,7 @@ Legend: ✅ available · 🚧 partial · ⬜ planned
 
 | Service | Transport strategy | Depth |
 | --- | --- | --- |
-| Cloud Storage | REST interception | buckets, objects, uploads (simple/multipart/resumable), ranged downloads, list, copy/rewrite |
+| Cloud Storage | REST interception | buckets, objects, uploads (simple/multipart/resumable), ranged downloads, list, copy/rewrite, IAM, HMAC keys, ACLs, notifications, signed URLs |
 | Secret Manager | forced REST | secrets, versions, access, enable/disable/destroy |
 | Pub/Sub | in-process gRPC emulator | topics, subscriptions, publish fan-out, pull/ack/nack, push handlers |
 | BigQuery | REST interception | datasets, tables, streaming inserts, read rows, SQL query execution (via `drongo[bigquery]`) |
@@ -27,7 +27,9 @@ Legend: ✅ available · 🚧 partial · ⬜ planned
 | Memorystore (Redis) | forced REST (LRO) | instance admin |
 | Vertex AI | forced REST (LRO) | datasets, endpoints, models (deploy/predict), custom/batch jobs |
 | Cloud Monitoring | injected gRPC transport | metrics + aggregation, alert policies, notification channels, uptime checks, groups, snoozes, services/SLOs |
+| Storage Transfer | forced REST (LRO) | transfer jobs (CRUD + run), transfer operations, service account, agent pools |
 | Document AI | forced REST (LRO) | processors (CRUD + enable/disable), process document (handler), batch process, processor types |
+| Artifact Registry | forced REST (LRO) | repositories (CRUD), tags (CRUD), packages/versions/files (read/delete, seedable) |
 
 ## Available capabilities
 
@@ -37,27 +39,18 @@ Legend: ✅ available · 🚧 partial · ⬜ planned
 - ✅ **Faker data seeding** (`drongo.seed`)
 - ✅ **Standalone HTTP server** (`drongo server`) for non-Python SDKs
 - ✅ **Typed** (`py.typed`, mypy-checked)
+- 🚧 **Verified against real GCP** ([fidelity suite](fidelity.md)): dual-target
+  `@gcp_verified` scenarios that run under the mock in CI and against a real
+  project on demand, with divergence recorded in `KNOWN_GAPS.md`. Cloud Storage
+  and Pub/Sub are covered so far.
 
 ## Planned services
-
-### Next up — prioritized
-
-These are the next services to build, ahead of the tiers below.
-
-| Service | Client | Notes |
-| --- | --- | --- |
-| Artifact Registry | `google-cloud-artifact-registry` | repositories, packages, versions, tags |
-| Storage Transfer | `google-cloud-storage-transfer` | transfer jobs and operations (control plane) |
 
 ### Tier 1 — shipped
 
 Tier 1 is done: Cloud Logging, Cloud KMS, IAM & Service Accounts, Cloud
-Scheduler, Cloud Functions, Datastore, and Memorystore are all available (see the
-table above). The one item still open is:
-
-| Service | Client | Notes |
-| --- | --- | --- |
-| Storage depth | `google-cloud-storage` | signed URLs, IAM, notifications, HMAC keys |
+Scheduler, Cloud Functions, Datastore, Memorystore, and Storage depth (IAM, HMAC
+keys, ACLs, notifications, signed URLs) are all available.
 
 ### Tier 2 — databases & infrastructure
 
@@ -74,14 +67,22 @@ table above). The one item still open is:
 Dataflow · Dataproc · Vision / Speech / Translation / Natural Language · GKE
 (Container) · Cloud Build · Cloud DNS · Eventarc · Workflows · Cloud Trace.
 
-(Artifact Registry is promoted to [Next up](#next-up-prioritized).)
-
 ## Planned capabilities
 
 Informed by moto's management plane and coverage tracking:
 
 - ⬜ **Coverage matrix** — a per-operation status doc for every service (moto's
-  `IMPLEMENTATION_COVERAGE.md` is the model), so gaps are explicit.
+  `IMPLEMENTATION_COVERAGE.md` is the model), so gaps are explicit. Intended to
+  be generated from Google's [Discovery documents](https://discovery.googleapis.com/discovery/v1/apis)
+  and the [googleapis](https://github.com/googleapis/googleapis) protos,
+  cross-referenced with each service's `urls.py` and its `@gcp_verified`
+  scenarios, giving three states per method: verified, implemented, missing.
+- ⬜ **Recorded live responses** — normalised request/response pairs captured on
+  a live [fidelity](fidelity.md) run and replayed in CI, so drift in the real
+  service is detected without credentials on every pull request.
+- ⬜ **Fidelity scenarios for every service** — extend the suite past Cloud
+  Storage and Pub/Sub, and make them a requirement in
+  [contributing a service](contributing-a-service.md).
 - ⬜ **Management endpoint in server mode** — an HTTP reset/seed/config route
   (à la moto's `/moto-api/reset`) for cross-process and non-Python test suites.
 - ⬜ **State-transition manager** — let resources advance over time/calls

@@ -22,7 +22,9 @@ namespace.
 | Copy / rewrite object | ✅ |
 | Bucket IAM policy (get / set / test) | ✅ |
 | HMAC keys (create / list / get / update / delete) | ✅ |
-| Signed URLs, object ACLs, notifications | ⬜ |
+| Object / bucket ACLs (incl. `make_public`) | ✅ |
+| Notifications (create / list / get / delete) | ✅ |
+| Signed URLs (generate + serve via GET / PUT) | ✅ |
 
 ## Secret Manager (`secretmanager`)
 
@@ -314,9 +316,36 @@ with no `transport` argument; pass the regional endpoint as usual.
 | Processor types: fetch / list / get | ✅ |
 | Processor versions, human review, evaluations | ⬜ |
 
-## Planned
+## Storage Transfer (`storagetransfer`)
 
-Next up (prioritized): Artifact Registry · Storage Transfer.
+Client: `google-cloud-storage-transfer` (`storage_transfer_v1`) · Transport: gRPC
+(default), forced to REST during a mock scope · Backend: one global namespace. Use
+the normal client with no `transport` argument; methods take `request=` objects.
+
+| Operation | Status |
+| --- | --- |
+| Transfer jobs: create / get / list / update / delete | ✅ |
+| Run transfer job (LRO) + operation get / pause / resume / cancel | ✅ |
+| Google service account: get | ✅ |
+| Agent pools: create / get / list / update / delete | ✅ |
+| Actual data movement between buckets | ⬜ (no real I/O) |
+
+## Artifact Registry (`artifactregistry`)
+
+Client: `google-cloud-artifact-registry` (`artifactregistry_v1`) · Transport: gRPC
+(default), forced to REST during a mock scope · Backend: per-project. Use the
+normal client with no `transport` argument.
+
+| Operation | Status |
+| --- | --- |
+| Repositories: create / get / list / update / delete (LRO) | ✅ |
+| Tags: create / get / list / update / delete | ✅ |
+| Packages: list / get / delete (LRO), seed via backend | ✅ |
+| Versions: list / get / delete (LRO), seed via backend | ✅ |
+| Files: list / get, seed via backend | ✅ |
+| Artifact upload/download, IAM, format-specific APIs | ⬜ |
+
+## Planned
 
 Also planned: Cloud Spanner · Firestore transactions & listeners · IAM roles &
 policies · KMS key versions · Bigtable read filters. See the
